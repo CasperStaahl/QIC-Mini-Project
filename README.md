@@ -2,9 +2,8 @@
 
 ## Introduction
 
-I will try to use Grover's Algorithm to make our abstract interpretation framework SQAAL more precise.
-In particular we will for some Boolean expression over some abstract values try to find more specific abstract values that are contained within the original abstract values that make the Boolean expression still evaluate to some abstract value that contains true.
-The idea is then to use Grover's Algorithm to search for such abstract values, given some Boolean expression over some abstract values.
+The task is to use Grover's algorithm to implement a tautology/contradiction checker for zeroth-order propositions.
+Further I want to use this to implement a reachability analysis for a simple while programming language if I have the time.
 
 ## State of the art
 
