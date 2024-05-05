@@ -41,6 +41,19 @@ def test_valuation_negation(a, expected):
     ass = {"A": a}
     assert valuation(p, ass) == expected
 
+def test_count_atomic_propositions():
+    p = Conjunction(
+            Disjunction(
+                Atomic("A"),
+                Atomic("B")
+                ),
+            Negation(
+                Atomic("C")
+                )
+            )
+    assert count_atomic_propositions(p) == 3
+
+
 
 
 

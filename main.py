@@ -1,5 +1,5 @@
 import math
-from typing import Dict
+from typing import Dict, Set
 
 Assignment = Dict[str, bool]
 
@@ -31,7 +31,7 @@ class Disjunction(Proposition):
 def is_tautology(p: Proposition, c: float) -> bool:
     not_p = Negation(p)
     oracle = convert_to_q_circuit(not_p)
-    n = 2 ** count_distinct_atomic_propositions(not_p)
+    n = 2 ** count_atomic_propositions(not_p)
     t = 0
     k = n / (2 ** t)
     while t <= math.log2(n / k) + c:
@@ -46,8 +46,16 @@ def is_tautology(p: Proposition, c: float) -> bool:
 def convert_to_q_circuit(p: Proposition):
     pass
 
-def count_distinct_atomic_propositions(p: Proposition) -> int:
-    pass
+def count_atomic_propositions(p: Proposition) -> int:
+    return len(atomic_propositions(p))
+
+def atomic_propositions(p: Proposition) -> Set[str]:
+    if type(p) is Atomic:
+        return {p.id}
+    if type(p) is Negation:
+        return atomic_propositions(p.not_p)
+    if type(p) is Conjunction or type(p) is Disjunction:
+        return atomic_propositions(p.p1) | atomic_propositions(p.p2)
 
 def valuation(p: Proposition, ass: Assignment):
     if type(p) is Atomic:
