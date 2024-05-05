@@ -1,7 +1,22 @@
 import math
+from typing import Dict
+
+Assignment = Dict[str, bool]
 
 class Proposition:
     pass
+
+class Atomic(Proposition):
+    def __init__(self, id: str):
+        self.id = id
+
+class Atomic(Proposition):
+    def __init__(self, id: str):
+        self.id = id
+
+class Negation(Proposition):
+    def __init__(self, not_p: Proposition):
+        self.not_p = not_p
 
 class Conjunction(Proposition):
     def __init__(self, p1: Proposition, p2: Proposition):
@@ -12,14 +27,6 @@ class Disjunction(Proposition):
     def __init__(self, p1: Proposition, p2: Proposition):
         self.p1 = p1
         self.p2 = p2
-
-class Negation(Proposition):
-    def __init__(self, p: Proposition):
-        self.p = p
-
-class atomic(Proposition):
-    def __init__(self, id: str):
-        self.id = id
 
 def is_tautology(p: Proposition, c: float) -> bool:
     not_p = Negation(p)
@@ -43,7 +50,14 @@ def count_distinct_atomic_propositions(p: Proposition) -> int:
     pass
 
 def valuation(p: Proposition, ass: Assignment):
-    pass
+    if type(p) is Atomic:
+        return ass[p.id]
+    if type(p) is Negation:
+        return not valuation(p.not_p, ass)
+    if type(p) is Conjunction:
+        return valuation(p.p1, ass) and valuation(p.p2, ass)
+    if type(p) is Disjunction:
+        return valuation(p.p1, ass) or valuation(p.p2, ass)
 
 
 
