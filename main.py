@@ -1,14 +1,12 @@
 import math
 from typing import Dict, Set
+from qiskit import QuantumCircuit
+from qiskit.circuit import QuantumRegister
 
 Assignment = Dict[str, bool]
 
 class Proposition:
     pass
-
-class Atomic(Proposition):
-    def __init__(self, id: str):
-        self.id = id
 
 class Atomic(Proposition):
     def __init__(self, id: str):
@@ -44,7 +42,52 @@ def is_tautology(p: Proposition, c: float) -> bool:
     return True
 
 def convert_to_q_circuit(p: Proposition):
-    pass
+    atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
+    qc_base = QuantumCircuit(len(atom_lookup))
+    return convert_to_q_circuit_recur(p, qc_base, atom_lookup)
+
+def convert_to_q_circuit_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
+    if type(p) is Atomic:
+        qc_atom = QuantumCircuit(qc_base.num_qubits + 1)
+        qc_atom.cx(1 + atom_lookup[p.id], 0, f"atom {p.id}")
+        qc_atom.compose(qc_base, list(range(1, qc_base.num_qubits + 1)))
+        return qc_atom
+
+    if type(p) is Negation:
+        qc_pnot = convert_to_q_circuit_recur(p.not_p, qc_base, atom_lookup)
+        qc_pnot.x(0)
+        return qc_pnot
+
+    if type(p) is Conjunction or Disjunction:
+        qc_1 = convert_to_q_circuit_recur(p.p1, qc_base, atom_lookup)
+        qc_2 = convert_to_q_circuit_recur(p.p2, qc_base, atom_lookup)
+
+        qc_1_start = 1
+        qc_1_end = qc_1_start + qc_1.num_qubits - qc_base.num_qubits
+
+        qc_2_start = qc_1_end
+        qc_2_end = qc_2_start + qc_2.num_qubits - qc_base.num_qubits
+
+        qc_base_start = qc_2_end
+        qc_base_end = qc_base_start + qc_base.num_qubits
+        qc_base_range = list(range(qc_base_start, qc_base_end))
+
+        qc_junction = QuantumCircuit(qc_base_end)
+
+        qc_1_range = list(range(qc_1_start, qc_1_end)) + qc_base_range
+        qc_junction.compose(qc_1, qc_1_range , inplace=True)
+
+        qc_2_range = list(range(qc_2_start, qc_2_end)) + qc_base_range
+        qc_junction.compose(qc_2, qc_2_range, inplace=True)
+
+        if type(p) is Disjunction:
+            qc_junction.x(qc_1_start)
+            qc_junction.x(qc_2_start)
+        qc_junction.ccx(qc_1_start, qc_2_start, 0)
+        if type(p) is Disjunction:
+                qc_junction.x(0)
+
+        return qc_junction
 
 def count_atomic_propositions(p: Proposition) -> int:
     return len(atomic_propositions(p))
@@ -67,5 +110,16 @@ def valuation(p: Proposition, ass: Assignment):
     if type(p) is Disjunction:
         return valuation(p.p1, ass) or valuation(p.p2, ass)
 
-
+if __name__ == "__main__":
+    p = Conjunction(
+            Disjunction(
+                Atomic("A"),
+                Atomic("B")
+                ),
+            Negation(
+                Atomic("A")
+                )
+            )
+    qc = convert_to_q_circuit(p)
+    print(qc)
 
