@@ -2,6 +2,7 @@ import math
 from typing import Dict, Set
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
+from qiskit.circuit.library import GroverOperator
 
 Assignment = Dict[str, bool]
 
@@ -28,25 +29,38 @@ class Disjunction(Proposition):
 
 def is_tautology(p: Proposition, c: float) -> bool:
     not_p = Negation(p)
-    oracle = convert_to_q_circuit(not_p)
+    oracle, atom_lookup = convert_to_q_circuit(not_p)
+    grover = grover(oracle, atom_lookup)
     n = 2 ** count_atomic_propositions(not_p)
     t = 0
     k = n / (2 ** t)
     while t <= math.log2(n / k) + c:
         iterations = (math.pi / 4) * ((n / k) ** 0.5)
-        witness_assignment = grover(oracle, iterations)
+        # todo repeat grover onto itself iterations times and run it to get  a valuation.
+        # witness_assignment = grover(oracle, iterations)
         if valuation(not_p, witness_assignment):
             return False
         t += 1
         k = n / (2 ** t)
     return True
 
-def convert_to_q_circuit(p: Proposition):
+def phase_oracle(p: Proposition):
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
     qc_base = QuantumCircuit(len(atom_lookup))
-    return convert_to_q_circuit_recur(p, qc_base, atom_lookup)
+    qc_r = phase_oracle_recur(p, qc_base, atom_lookup)
+    qc_r_r_daggert_pos = list(range(1, qc_r.num_qubits + 1))
+    qc_final = QuantumCircuit(qc_r.num_qubits + 1)
+    qc_final.compose(qc_r, qc_r_r_daggert_pos, inplace=True)
+    qc_final.x(0)
+    qc_final.h(0)
+    qc_final.cx(1, 0)
+    qc_final.h(0)
+    qc_final.x(0)
+    qc_r_daggert = qc_r.inverse()
+    qc_final.compose(qc_r_daggert, qc_r_r_daggert_pos, inplace=True)
+    return qc_final, atom_lookup
 
-def convert_to_q_circuit_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
+def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
     if type(p) is Atomic:
         qc_atom = QuantumCircuit(qc_base.num_qubits + 1)
         qc_atom.cx(1 + atom_lookup[p.id], 0, f"atom {p.id}")
@@ -54,13 +68,13 @@ def convert_to_q_circuit_recur(p: Proposition, qc_base: QuantumCircuit, atom_loo
         return qc_atom
 
     if type(p) is Negation:
-        qc_pnot = convert_to_q_circuit_recur(p.not_p, qc_base, atom_lookup)
+        qc_pnot = phase_oracle_recur(p.not_p, qc_base, atom_lookup)
         qc_pnot.x(0)
         return qc_pnot
 
     if type(p) is Conjunction or Disjunction:
-        qc_1 = convert_to_q_circuit_recur(p.p1, qc_base, atom_lookup)
-        qc_2 = convert_to_q_circuit_recur(p.p2, qc_base, atom_lookup)
+        qc_1 = phase_oracle_recur(p.p1, qc_base, atom_lookup)
+        qc_2 = phase_oracle_recur(p.p2, qc_base, atom_lookup)
 
         qc_1_start = 1
         qc_1_end = qc_1_start + qc_1.num_qubits - qc_base.num_qubits
@@ -89,6 +103,14 @@ def convert_to_q_circuit_recur(p: Proposition, qc_base: QuantumCircuit, atom_loo
 
         return qc_junction
 
+def grover(oracle, atom_lookup):
+    qc_state_prep = QuantumCircuit(oracle.num_qubits)
+    qc_state_prep.h(0)
+    for i in range(len(atom_lookup)):
+        qc_state_prep.h(qc_state_prep.num_qubits - i - 1)
+    grover_op = GroverOperator(oracle, qc_state_prep)
+    return grover_op
+
 def count_atomic_propositions(p: Proposition) -> int:
     return len(atomic_propositions(p))
 
@@ -114,12 +136,13 @@ if __name__ == "__main__":
     p = Conjunction(
             Disjunction(
                 Atomic("A"),
-                Atomic("B")
+                Atomic("A")
                 ),
             Negation(
                 Atomic("A")
                 )
             )
-    qc = convert_to_q_circuit(p)
+    qc, lookup = phase_oracle(p)
+    qc = grover(qc, lookup).decompose()
     print(qc)
 
