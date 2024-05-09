@@ -89,7 +89,6 @@ def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
         qc_junction = QuantumCircuit(qc_2_end + 1)
 
         qc_1_range = qc_base_range + list(range(qc_1_start, qc_1_end))
-        print(qc_1_range)
         qc_junction.compose(qc_1, qc_1_range , inplace=True)
 
         qc_2_range = qc_base_range + list(range(qc_2_start, qc_2_end))
