@@ -48,14 +48,14 @@ def phase_oracle(p: Proposition):
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
     qc_base = QuantumCircuit(len(atom_lookup))
     qc_r = phase_oracle_recur(p, qc_base, atom_lookup)
-    qc_r_r_daggert_pos = list(range(1, qc_r.num_qubits + 1))
+    qc_r_r_daggert_pos = list(range(0, qc_r.num_qubits))
     qc_final = QuantumCircuit(qc_r.num_qubits + 1)
     qc_final.compose(qc_r, qc_r_r_daggert_pos, inplace=True)
-    qc_final.x(0)
-    qc_final.h(0)
-    qc_final.cx(1, 0)
-    qc_final.h(0)
-    qc_final.x(0)
+    qc_final.x(qc_final.num_qubits - 1)
+    qc_final.h(qc_final.num_qubits - 1)
+    qc_final.cx(qc_final.num_qubits - 2, qc_final.num_qubits - 1)
+    qc_final.h(qc_final.num_qubits - 1)
+    qc_final.x(qc_final.num_qubits - 1)
     qc_r_daggert = qc_r.inverse()
     qc_final.compose(qc_r_daggert, qc_r_r_daggert_pos, inplace=True)
     return qc_final, atom_lookup
@@ -63,52 +63,53 @@ def phase_oracle(p: Proposition):
 def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
     if type(p) is Atomic:
         qc_atom = QuantumCircuit(qc_base.num_qubits + 1)
-        qc_atom.cx(1 + atom_lookup[p.id], 0, f"atom {p.id}")
+        qc_atom.cx(atom_lookup[p.id], qc_base.num_qubits, f"atom {p.id}")
         qc_atom.compose(qc_base, list(range(1, qc_base.num_qubits + 1)))
         return qc_atom
 
     if type(p) is Negation:
         qc_pnot = phase_oracle_recur(p.not_p, qc_base, atom_lookup)
-        qc_pnot.x(0)
+        qc_pnot.x(qc_pnot.num_qubits - 1)
         return qc_pnot
 
     if type(p) is Conjunction or Disjunction:
         qc_1 = phase_oracle_recur(p.p1, qc_base, atom_lookup)
         qc_2 = phase_oracle_recur(p.p2, qc_base, atom_lookup)
 
-        qc_1_start = 1
+        qc_base_start = 0
+        qc_base_end = qc_base_start + qc_base.num_qubits
+        qc_base_range = list(range(qc_base_start, qc_base_end))
+
+        qc_1_start = qc_base_end
         qc_1_end = qc_1_start + qc_1.num_qubits - qc_base.num_qubits
 
         qc_2_start = qc_1_end
         qc_2_end = qc_2_start + qc_2.num_qubits - qc_base.num_qubits
 
-        qc_base_start = qc_2_end
-        qc_base_end = qc_base_start + qc_base.num_qubits
-        qc_base_range = list(range(qc_base_start, qc_base_end))
+        qc_junction = QuantumCircuit(qc_2_end + 1)
 
-        qc_junction = QuantumCircuit(qc_base_end)
-
-        qc_1_range = list(range(qc_1_start, qc_1_end)) + qc_base_range
+        qc_1_range = qc_base_range + list(range(qc_1_start, qc_1_end))
+        print(qc_1_range)
         qc_junction.compose(qc_1, qc_1_range , inplace=True)
 
-        qc_2_range = list(range(qc_2_start, qc_2_end)) + qc_base_range
+        qc_2_range = qc_base_range + list(range(qc_2_start, qc_2_end))
         qc_junction.compose(qc_2, qc_2_range, inplace=True)
 
         if type(p) is Disjunction:
-            qc_junction.x(qc_1_start)
-            qc_junction.x(qc_2_start)
-        qc_junction.ccx(qc_1_start, qc_2_start, 0)
+            qc_junction.x(qc_1_end - 1)
+            qc_junction.x(qc_2_end - 1)
+        qc_junction.ccx(qc_1_end - 1, qc_2_end - 1, qc_junction.num_qubits -1)
         if type(p) is Disjunction:
-                qc_junction.x(0)
+                qc_junction.x(qc_junction.num_qubits - 1)
 
         return qc_junction
 
 def grover(oracle, atom_lookup):
     qc_state_prep = QuantumCircuit(oracle.num_qubits)
-    qc_state_prep.h(0)
+    qc_state_prep.h(oracle.num_qubits - 1)
     for i in range(len(atom_lookup)):
-        qc_state_prep.h(qc_state_prep.num_qubits - i - 1)
-    grover_op = GroverOperator(oracle, qc_state_prep)
+        qc_state_prep.h(i)
+    grover_op = GroverOperator(oracle, qc_state_prep, insert_barriers=True)
     return grover_op
 
 def count_atomic_propositions(p: Proposition) -> int:
@@ -136,10 +137,10 @@ if __name__ == "__main__":
     p = Conjunction(
             Disjunction(
                 Atomic("A"),
-                Atomic("A")
+                Atomic("B")
                 ),
             Negation(
-                Atomic("A")
+                Atomic("C")
                 )
             )
     qc, lookup = phase_oracle(p)
