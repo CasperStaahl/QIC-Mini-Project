@@ -51,7 +51,7 @@ def satisfiable(p: Proposition, c: float, sampler) -> bool:
             return True
         t += 1
         k = n / (2 ** t)
-        if t == math.log2(n / k) + c:
+        if math.isclose(t, math.log2(n / k) + c):
             break
     return False
 
