@@ -1,4 +1,5 @@
 import math
+import random
 from typing import Dict, Set
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
@@ -28,33 +29,28 @@ class Disjunction(Proposition):
         self.p1 = p1
         self.p2 = p2
 
-def satisfiable(p: Proposition, c: float, sampler) -> bool:
+def satisfiable(p: Proposition, sampler) -> bool:
     # pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
     oracle, atom_lookup = phase_oracle(p)
     grover_op = grover(oracle, atom_lookup)
-    n = 2 ** count_atomic_propositions(p)
-    t = 0
-    k = n / (2 ** t)
-    while True:
-        iterations = math.floor((math.pi / 4) * ((n / k) ** 0.5))
-        grover_i_times = QuantumCircuit(grover_op.num_qubits)
-        grover_i_times.h(list(range(len(atom_lookup))) + [grover_op.num_qubits - 1])
-        for i in range(iterations):
-            grover_i_times.compose(grover_op, inplace=True)
-        grover_i_times.measure_all()
+    N = 2 ** count_atomic_propositions(p)
+    m = 1
+    while m <= math.sqrt(N):
+        k = random.randint(1, round(m))
+        grover_k_times = QuantumCircuit(grover_op.num_qubits)
+        grover_k_times.h(list(range(len(atom_lookup))) + [grover_op.num_qubits - 1])
+        for _ in range(k):
+            grover_k_times.compose(grover_op, inplace=True)
+        grover_k_times.measure_all()
         # isa_grover_i_times = pm.run(grover_i_times)
-        result = sampler.run([grover_i_times], shots=1).result()[0].data.meas.get_counts()
+        result = sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
         result_bit_string = next(iter(result))[::-1]
         witness_assignment = {}
-        print(f"{result_bit_string}\n")
         for atom in atomic_propositions(p):
             witness_assignment[atom] = char_to_bool(result_bit_string[atom_lookup[atom]])
         if valuation(p, witness_assignment):
             return True
-        t += 1
-        k = n / (2 ** t)
-        if math.isclose(t, math.log2(n / k) + c):
-            break
+        m = (5 / 4) * m
     return False
 
 def char_to_bool(char: str) -> bool:

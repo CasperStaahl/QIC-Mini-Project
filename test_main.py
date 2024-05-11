@@ -9,9 +9,8 @@ def test_satisfiable_simple_tautologi():
                 Atomic("A")
                 )
             )
-    c = 0
     sampler = StatevectorSampler()
-    assert satisfiable(p, c, sampler) == True
+    assert satisfiable(p, sampler) == True
 
 def test_satisfiable_simple_contradiction():
     p = Conjunction(
@@ -20,8 +19,8 @@ def test_satisfiable_simple_contradiction():
                 Atomic("A")
                 )
             )
-    c = 0
     sampler = StatevectorSampler()
+    assert satisfiable(p, sampler) == False
 
 def test_satisfiable_complex_contradiction():
     A = Atomic("A")
@@ -41,9 +40,8 @@ def test_satisfiable_complex_contradiction():
     p = Disjunction(negated_conjunction, C)
     not_p = Negation(p)
 
-    c = 0
     sampler = StatevectorSampler()
-    assert satisfiable(not_p, c, sampler) == False
+    assert satisfiable(not_p, sampler) == False
 
 def test_satisfiable_complex_single_solution():
     # Creating atomic propositions
@@ -66,9 +64,8 @@ def test_satisfiable_complex_single_solution():
     p = Disjunction(negated_left_expression, A)
     not_p = Negation(p)
 
-    c = 1
     sampler = StatevectorSampler()
-    assert satisfiable(not_p, c, sampler) == True
+    assert satisfiable(not_p, sampler) == True
 
 @pytest.mark.parametrize("a,b,expected", [
     (True, True, True),
