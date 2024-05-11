@@ -1,5 +1,28 @@
 from main import *
 import pytest
+from qiskit.primitives import StatevectorSampler
+
+def test_satisfiable_simple_tautologi():
+    p = Disjunction(
+            Atomic("A"),
+            Negation(
+                Atomic("A")
+                )
+            )
+    c = 0
+    sampler = StatevectorSampler()
+    assert satisfiable(p, c, sampler) == True
+
+def test_satisfiable_simple_contradiction():
+    p = Conjunction(
+            Atomic("A"),
+            Negation(
+                Atomic("A")
+                )
+            )
+    c = 0
+    sampler = StatevectorSampler()
+    assert satisfiable(p, c, sampler) == False
 
 @pytest.mark.parametrize("a,b,expected", [
     (True, True, True),

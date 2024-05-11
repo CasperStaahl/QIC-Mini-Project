@@ -3,6 +3,7 @@ from typing import Dict, Set
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
+from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 Assignment = Dict[str, bool]
 
@@ -27,22 +28,38 @@ class Disjunction(Proposition):
         self.p1 = p1
         self.p2 = p2
 
-def is_tautology(p: Proposition, c: float) -> bool:
-    not_p = Negation(p)
-    oracle, atom_lookup = convert_to_q_circuit(not_p)
-    grover = grover(oracle, atom_lookup)
-    n = 2 ** count_atomic_propositions(not_p)
+def satisfiable(p: Proposition, c: float, sampler) -> bool:
+    # pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+    oracle, atom_lookup = phase_oracle(p)
+    grover_op = grover(oracle, atom_lookup)
+    n = 2 ** count_atomic_propositions(p)
     t = 0
     k = n / (2 ** t)
-    while t <= math.log2(n / k) + c:
-        iterations = (math.pi / 4) * ((n / k) ** 0.5)
-        # todo repeat grover onto itself iterations times and run it to get  a valuation.
-        # witness_assignment = grover(oracle, iterations)
-        if valuation(not_p, witness_assignment):
-            return False
+    while True:
+        iterations = math.floor((math.pi / 4) * ((n / k) ** 0.5))
+        grover_i_times = QuantumCircuit(grover_op.num_qubits)
+        for i in range(iterations):
+            grover_i_times.compose(grover_op, inplace=True)
+        grover_i_times.measure_all()
+        # isa_grover_i_times = pm.run(grover_i_times)
+        result = sampler.run([grover_i_times], shots=1).result()[0].data.meas.get_counts()
+        result_bit_string = next(iter(result))
+        witness_assignment = {}
+        for atom in atomic_propositions(p):
+            witness_assignment[atom] = char_to_bool(result_bit_string[atom_lookup[atom]])
+        if valuation(p, witness_assignment):
+            return True
         t += 1
         k = n / (2 ** t)
-    return True
+        if t == math.log2(n / k) + c:
+            break
+    return False
+
+def char_to_bool(char: str) -> bool:
+    if char == "0":
+        return False
+    if char == "1":
+        return True
 
 def phase_oracle(p: Proposition):
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
@@ -108,7 +125,8 @@ def grover(oracle, atom_lookup):
     qc_state_prep.h(oracle.num_qubits - 1)
     for i in range(len(atom_lookup)):
         qc_state_prep.h(i)
-    grover_op = GroverOperator(oracle, qc_state_prep, insert_barriers=True)
+    reflection_qubits = list(range(len(atom_lookup))) + [oracle.num_qubits - 1]
+    grover_op = GroverOperator(oracle, qc_state_prep, reflection_qubits=reflection_qubits)
     return grover_op
 
 def count_atomic_propositions(p: Proposition) -> int:
@@ -142,7 +160,10 @@ if __name__ == "__main__":
                 Atomic("C")
                 )
             )
-    qc, lookup = phase_oracle(p)
-    qc = grover(qc, lookup).decompose()
-    print(qc)
+    oracle, lookup = phase_oracle(p)
+    grover = grover(oracle, lookup)
+    grover_i_times = QuantumCircuit(oracle.num_qubits)
+    grover_i_times.append(grover, list(range(oracle.num_qubits)))
+    grover_i_times.append(grover, list(range(oracle.num_qubits)))
+    print(grover_i_times)
 
