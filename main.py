@@ -38,13 +38,15 @@ def satisfiable(p: Proposition, c: float, sampler) -> bool:
     while True:
         iterations = math.floor((math.pi / 4) * ((n / k) ** 0.5))
         grover_i_times = QuantumCircuit(grover_op.num_qubits)
+        grover_i_times.h(list(range(len(atom_lookup))) + [grover_op.num_qubits - 1])
         for i in range(iterations):
             grover_i_times.compose(grover_op, inplace=True)
         grover_i_times.measure_all()
         # isa_grover_i_times = pm.run(grover_i_times)
         result = sampler.run([grover_i_times], shots=1).result()[0].data.meas.get_counts()
-        result_bit_string = next(iter(result))
+        result_bit_string = next(iter(result))[::-1]
         witness_assignment = {}
+        print(f"{result_bit_string}\n")
         for atom in atomic_propositions(p):
             witness_assignment[atom] = char_to_bool(result_bit_string[atom_lookup[atom]])
         if valuation(p, witness_assignment):
