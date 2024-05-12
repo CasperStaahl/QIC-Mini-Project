@@ -128,7 +128,9 @@ def phase_oracle(p: Proposition) -> QuantumCircuit:
     return qc_final, atom_lookup
 
 
-def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup: Dict[str, int]) -> QuantumCircuit:
+def phase_oracle_recur(
+    p: Proposition, qc_base: QuantumCircuit, atom_lookup: Dict[str, int]
+) -> QuantumCircuit:
     """
     Converts the proposition p to the corresponding classical circuit embedded in a quantum circuit.
 
