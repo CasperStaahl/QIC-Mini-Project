@@ -23,15 +23,18 @@ class Negation(Proposition):
     def __init__(self, not_p: Proposition):
         self.not_p = not_p
 
+
 class Conjunction(Proposition):
     def __init__(self, p1: Proposition, p2: Proposition):
         self.p1 = p1
         self.p2 = p2
 
+
 class Disjunction(Proposition):
     def __init__(self, p1: Proposition, p2: Proposition):
         self.p1 = p1
         self.p2 = p2
+
 
 def satisfiable(p: Proposition, sampler: Sampler) -> bool:
     """
@@ -68,13 +71,17 @@ def satisfiable(p: Proposition, sampler: Sampler) -> bool:
         # isa_grover_i_times = pm.run(grover_i_times)
 
         # Run circuit, get result.
-        result = sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
+        result = (
+            sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
+        )
         result_bit_string = next(iter(result))[::-1]
 
         # Convert result to an assignment, and check if the valuation of the assignment is True.
         witness_assignment = {}
         for atom in atomic_propositions(p):
-            witness_assignment[atom] = char_to_bool(result_bit_string[atom_lookup[atom]])
+            witness_assignment[atom] = char_to_bool(
+                result_bit_string[atom_lookup[atom]]
+            )
         if valuation(p, witness_assignment):
             return True
 
@@ -83,6 +90,7 @@ def satisfiable(p: Proposition, sampler: Sampler) -> bool:
 
     # If no assignment is found return False.
     return False
+
 
 def phase_oracle(p: Proposition):
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
@@ -99,6 +107,7 @@ def phase_oracle(p: Proposition):
     qc_r_daggert = qc_r.inverse()
     qc_final.compose(qc_r_daggert, qc_r_r_daggert_pos, inplace=True)
     return qc_final, atom_lookup
+
 
 def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
     if type(p) is Atomic:
@@ -129,7 +138,7 @@ def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
         qc_junction = QuantumCircuit(qc_2_end + 1)
 
         qc_1_range = qc_base_range + list(range(qc_1_start, qc_1_end))
-        qc_junction.compose(qc_1, qc_1_range , inplace=True)
+        qc_junction.compose(qc_1, qc_1_range, inplace=True)
 
         qc_2_range = qc_base_range + list(range(qc_2_start, qc_2_end))
         qc_junction.compose(qc_2, qc_2_range, inplace=True)
@@ -137,11 +146,12 @@ def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
         if type(p) is Disjunction:
             qc_junction.x(qc_1_end - 1)
             qc_junction.x(qc_2_end - 1)
-        qc_junction.ccx(qc_1_end - 1, qc_2_end - 1, qc_junction.num_qubits -1)
+        qc_junction.ccx(qc_1_end - 1, qc_2_end - 1, qc_junction.num_qubits - 1)
         if type(p) is Disjunction:
-                qc_junction.x(qc_junction.num_qubits - 1)
+            qc_junction.x(qc_junction.num_qubits - 1)
 
         return qc_junction
+
 
 def grover(oracle, atom_lookup):
     qc_state_prep = QuantumCircuit(oracle.num_qubits)
@@ -149,11 +159,15 @@ def grover(oracle, atom_lookup):
     for i in range(len(atom_lookup)):
         qc_state_prep.h(i)
     reflection_qubits = list(range(len(atom_lookup))) + [oracle.num_qubits - 1]
-    grover_op = GroverOperator(oracle, qc_state_prep, reflection_qubits=reflection_qubits)
+    grover_op = GroverOperator(
+        oracle, qc_state_prep, reflection_qubits=reflection_qubits
+    )
     return grover_op
+
 
 def count_atomic_propositions(p: Proposition) -> int:
     return len(atomic_propositions(p))
+
 
 def atomic_propositions(p: Proposition) -> Set[str]:
     if type(p) is Atomic:
@@ -162,6 +176,7 @@ def atomic_propositions(p: Proposition) -> Set[str]:
         return atomic_propositions(p.not_p)
     if type(p) is Conjunction or type(p) is Disjunction:
         return atomic_propositions(p.p1) | atomic_propositions(p.p2)
+
 
 def valuation(p: Proposition, ass: Assignment):
     if type(p) is Atomic:
@@ -173,26 +188,19 @@ def valuation(p: Proposition, ass: Assignment):
     if type(p) is Disjunction:
         return valuation(p.p1, ass) or valuation(p.p2, ass)
 
+
 def char_to_bool(char: str) -> bool:
     if char == "0":
         return False
     if char == "1":
         return True
 
+
 if __name__ == "__main__":
-    p = Conjunction(
-            Disjunction(
-                Atomic("A"),
-                Atomic("B")
-                ),
-            Negation(
-                Atomic("C")
-                )
-            )
+    p = Conjunction(Disjunction(Atomic("A"), Atomic("B")), Negation(Atomic("C")))
     oracle, lookup = phase_oracle(p)
     grover = grover(oracle, lookup)
     grover_i_times = QuantumCircuit(oracle.num_qubits)
     grover_i_times.append(grover, list(range(oracle.num_qubits)))
     grover_i_times.append(grover, list(range(oracle.num_qubits)))
     print(grover_i_times)
-

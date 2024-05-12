@@ -2,25 +2,18 @@ from main import *
 import pytest
 from qiskit.primitives import StatevectorSampler
 
+
 def test_satisfiable_simple_tautologi():
-    p = Disjunction(
-            Atomic("A"),
-            Negation(
-                Atomic("A")
-                )
-            )
+    p = Disjunction(Atomic("A"), Negation(Atomic("A")))
     sampler = StatevectorSampler()
     assert satisfiable(p, sampler) == True
 
+
 def test_satisfiable_simple_contradiction():
-    p = Conjunction(
-            Atomic("A"),
-            Negation(
-                Atomic("A")
-                )
-            )
+    p = Conjunction(Atomic("A"), Negation(Atomic("A")))
     sampler = StatevectorSampler()
     assert satisfiable(p, sampler) == False
+
 
 def test_satisfiable_complex_contradiction():
     A = Atomic("A")
@@ -43,6 +36,7 @@ def test_satisfiable_complex_contradiction():
     sampler = StatevectorSampler()
     assert satisfiable(not_p, sampler) == False
 
+
 def test_satisfiable_complex_single_solution():
     A = Atomic("A")
     B = Atomic("B")
@@ -62,64 +56,52 @@ def test_satisfiable_complex_single_solution():
     sampler = StatevectorSampler()
     assert satisfiable(not_p, sampler) == True
 
-@pytest.mark.parametrize("a,b,expected", [
-    (True, True, True),
-    (True, False, False),
-    (False, True, False),
-    (False, False, False),
-])
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (True, True, True),
+        (True, False, False),
+        (False, True, False),
+        (False, False, False),
+    ],
+)
 def test_valuation_conjunction(a, b, expected):
-    p = Conjunction(
-            Atomic("A"),
-            Atomic("B")
-            )
+    p = Conjunction(Atomic("A"), Atomic("B"))
     ass = {"A": a, "B": b}
     assert valuation(p, ass) == expected
 
 
-@pytest.mark.parametrize("a,b,expected", [
-    (True, True, True),
-    (True, False, True),
-    (False, True, True),
-    (False, False, False),
-])
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (True, True, True),
+        (True, False, True),
+        (False, True, True),
+        (False, False, False),
+    ],
+)
 def test_valuation_disjunction(a, b, expected):
-    p = Disjunction(
-            Atomic("A"),
-            Atomic("B")
-            )
+    p = Disjunction(Atomic("A"), Atomic("B"))
     ass = {"A": a, "B": b}
     assert valuation(p, ass) == expected
 
-@pytest.mark.parametrize("a,expected", [
-    (True, False),
-    (False, True),
-])
+
+@pytest.mark.parametrize(
+    "a,expected",
+    [
+        (True, False),
+        (False, True),
+    ],
+)
 def test_valuation_negation(a, expected):
     p = Negation(
-            Atomic("A"),
-            )
+        Atomic("A"),
+    )
     ass = {"A": a}
     assert valuation(p, ass) == expected
 
+
 def test_count_atomic_propositions():
-    p = Conjunction(
-            Disjunction(
-                Atomic("A"),
-                Atomic("B")
-                ),
-            Negation(
-                Atomic("C")
-                )
-            )
+    p = Conjunction(Disjunction(Atomic("A"), Atomic("B")), Negation(Atomic("C")))
     assert count_atomic_propositions(p) == 3
-
-
-
-
-
-
-
-
-
-
