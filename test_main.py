@@ -44,22 +44,17 @@ def test_satisfiable_complex_contradiction():
     assert satisfiable(not_p, sampler) == False
 
 def test_satisfiable_complex_single_solution():
-    # Creating atomic propositions
     A = Atomic("A")
     B = Atomic("B")
     C = Atomic("C")
 
-    # Creating negations
     not_B = Negation(B)
 
-    # Creating conjunctions
     A_and_not_B = Conjunction(A, not_B)
     C_and_B = Conjunction(C, B)
 
-    # Creating disjunctions
     left_expression = Disjunction(A_and_not_B, C_and_B)
 
-    # Rewriting the implication as negation and disjunction
     negated_left_expression = Negation(left_expression)
     p = Disjunction(negated_left_expression, A)
     not_p = Negation(p)

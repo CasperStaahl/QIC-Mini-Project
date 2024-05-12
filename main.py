@@ -5,15 +5,19 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 Assignment = Dict[str, bool]
+
 
 class Proposition:
     pass
 
+
 class Atomic(Proposition):
     def __init__(self, id: str):
         self.id = id
+
 
 class Negation(Proposition):
     def __init__(self, not_p: Proposition):
@@ -29,35 +33,56 @@ class Disjunction(Proposition):
         self.p1 = p1
         self.p2 = p2
 
-def satisfiable(p: Proposition, sampler) -> bool:
+def satisfiable(p: Proposition, sampler: Sampler) -> bool:
+    """
+    Determines if proposition p is satisfiable, using Grover's algorithm with amplitude amplification.
+
+    Args:
+        p (Proposition): The proposition to check.
+        sampler (Sampler): The sampler that should be used for the execution of the quantum circuit.
+
+    Returns:
+        bool: True if p is satisfiable, False if p is unsatisfiable with high probability.
+
+    """
     # pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
+
+    # Convert proposition p to phase oracle and use oracle to create Grover operator.
     oracle, atom_lookup = phase_oracle(p)
     grover_op = grover(oracle, atom_lookup)
+
+    # Count number of assignments.
     N = 2 ** count_atomic_propositions(p)
+
     m = 1
     while m <= math.sqrt(N):
+        # randomly select number of applications of the Grover operator.
         k = random.randint(1, round(m))
+
+        # Create Grover's algorithm circuit
         grover_k_times = QuantumCircuit(grover_op.num_qubits)
         grover_k_times.h(list(range(len(atom_lookup))) + [grover_op.num_qubits - 1])
         for _ in range(k):
             grover_k_times.compose(grover_op, inplace=True)
         grover_k_times.measure_all()
         # isa_grover_i_times = pm.run(grover_i_times)
+
+        # Run circuit, get result.
         result = sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
         result_bit_string = next(iter(result))[::-1]
+
+        # Convert result to an assignment, and check if the valuation of the assignment is True.
         witness_assignment = {}
         for atom in atomic_propositions(p):
             witness_assignment[atom] = char_to_bool(result_bit_string[atom_lookup[atom]])
         if valuation(p, witness_assignment):
             return True
-        m = (5 / 4) * m
-    return False
 
-def char_to_bool(char: str) -> bool:
-    if char == "0":
-        return False
-    if char == "1":
-        return True
+        # Increase m exponentially.
+        m = (5 / 4) * m
+
+    # If no assignment is found return False.
+    return False
 
 def phase_oracle(p: Proposition):
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
@@ -147,6 +172,12 @@ def valuation(p: Proposition, ass: Assignment):
         return valuation(p.p1, ass) and valuation(p.p2, ass)
     if type(p) is Disjunction:
         return valuation(p.p1, ass) or valuation(p.p2, ass)
+
+def char_to_bool(char: str) -> bool:
+    if char == "0":
+        return False
+    if char == "1":
+        return True
 
 if __name__ == "__main__":
     p = Conjunction(
