@@ -92,10 +92,29 @@ def satisfiable(p: Proposition, sampler: Sampler) -> bool:
     return False
 
 
-def phase_oracle(p: Proposition):
+def phase_oracle(p: Proposition) -> QuantumCircuit:
+    """
+    Creates a quantum circuit that represents the proposition p.
+
+    The circuit that is returned has a number of input bits at the top corresponding to the atomic propositions.
+    The middle section of the circuit is reserved for workspace bits.
+    The bottom most bit is the result bit, the result is encoded in the phase of the bit.
+
+    Args:
+        p (Proposition): Proposition that should be converted.
+
+    Returns:
+        QuantumCircuit: p as a QuantumCircuit.
+
+    """
+    # Create a lookup table that corresponds atomic proposition to their location in the circuit.
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
+
+    # Create the 'left' side of of the circuit corresponding to a classical bit circuit.
     qc_base = QuantumCircuit(len(atom_lookup))
     qc_r = phase_oracle_recur(p, qc_base, atom_lookup)
+
+    # Compose the classical bit circuit with a result phase flip bit and its own inverse
     qc_r_r_daggert_pos = list(range(0, qc_r.num_qubits))
     qc_final = QuantumCircuit(qc_r.num_qubits + 1)
     qc_final.compose(qc_r, qc_r_r_daggert_pos, inplace=True)
@@ -109,18 +128,35 @@ def phase_oracle(p: Proposition):
     return qc_final, atom_lookup
 
 
-def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup):
+def phase_oracle_recur(p: Proposition, qc_base: QuantumCircuit, atom_lookup: Dict[str, int]) -> QuantumCircuit:
+    """
+    Converts the proposition p to the corresponding classical circuit embedded in a quantum circuit.
+
+    Args:
+        p (Proposition): Proposition that should be converted..
+        qc_base (QuantumCircuit): A circuit containing qubits corresponding to the ones present in atom_lookup.
+        atom_lookup (Dict[str, int]): lookup table corresponding atomic propositions to qubits in qc_base.
+
+    Returns:
+        QuantumCircuit: p as a quantum embedded classical circuit.
+
+    """
+
+    # If the proposition is an atom 'fanout' on the corresponding bit.
     if type(p) is Atomic:
         qc_atom = QuantumCircuit(qc_base.num_qubits + 1)
         qc_atom.cx(atom_lookup[p.id], qc_base.num_qubits, f"atom {p.id}")
         qc_atom.compose(qc_base, list(range(1, qc_base.num_qubits + 1)))
         return qc_atom
 
+    # If the proposition (not p) is a negation, construct the circuit for p and x/not gate the result bit.
     if type(p) is Negation:
         qc_pnot = phase_oracle_recur(p.not_p, qc_base, atom_lookup)
         qc_pnot.x(qc_pnot.num_qubits - 1)
         return qc_pnot
 
+    # If the proposition is (p and p') or (p or p') convert p and p',
+    # compose the two new circuits and/or gate the result bit of the two circuits to a new result bit.
     if type(p) is Conjunction or Disjunction:
         qc_1 = phase_oracle_recur(p.p1, qc_base, atom_lookup)
         qc_2 = phase_oracle_recur(p.p2, qc_base, atom_lookup)
