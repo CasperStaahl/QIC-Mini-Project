@@ -1,11 +1,11 @@
 import math
 import random
+from itertools import product
 from typing import Dict, Set
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-
 # from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 Assignment = Dict[str, bool]
@@ -267,6 +267,19 @@ def random_proposition(max_num_atoms: int, num_connectivities: int) -> Propositi
         if random.choice([True, False]):
             p = Negation(p)
         return p
+
+
+def satisfiable_brute(proposition):
+    atoms = atomic_propositions(proposition)
+    for assignment in all_assignments(atoms):
+        if valuation(proposition, assignment):
+            return True
+    return False
+
+
+def all_assignments(atoms):
+    for values in product([False, True], repeat=len(atoms)):
+        yield dict(zip(atoms, values))
 
 
 if __name__ == "__main__":
