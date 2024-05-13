@@ -5,7 +5,8 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
-from qiskit_ibm_runtime import SamplerV2 as Sampler
+
+# from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 Assignment = Dict[str, bool]
 
@@ -18,10 +19,16 @@ class Atomic(Proposition):
     def __init__(self, id: str):
         self.id = id
 
+    def __str__(self):
+        return f"{self.id}"
+
 
 class Negation(Proposition):
     def __init__(self, not_p: Proposition):
         self.not_p = not_p
+
+    def __str__(self):
+        return f"¬{self.not_p.__str__()}"
 
 
 class Conjunction(Proposition):
@@ -29,14 +36,20 @@ class Conjunction(Proposition):
         self.p1 = p1
         self.p2 = p2
 
+    def __str__(self):
+        return f"({self.p1.__str__()}∨{self.p2.__str__()})"
+
 
 class Disjunction(Proposition):
     def __init__(self, p1: Proposition, p2: Proposition):
         self.p1 = p1
         self.p2 = p2
 
+    def __str__(self):
+        return f"({self.p1.__str__()}∧{self.p2.__str__()})"
 
-def satisfiable(p: Proposition, sampler: Sampler) -> bool:
+
+def satisfiable(p: Proposition, sampler) -> bool:
     """
     Determines if proposition p is satisfiable, using Grover's algorithm with amplitude amplification.
 
@@ -234,11 +247,27 @@ def char_to_bool(char: str) -> bool:
         return True
 
 
+def random_proposition(max_num_atoms: int, num_connectivities: int) -> Proposition:
+    if num_connectivities == 0:
+        atom = Atomic(f"{random.randint(0, max_num_atoms - 1)}")
+        if random.choice([True, False]):
+            atom = Negation(atom)
+        return atom
+    if 0 < num_connectivities:
+        split = random.uniform(0, 1)
+        _num_connectivities = num_connectivities - 1
+        num_left = math.floor(_num_connectivities * split)
+        num_right = math.ceil(_num_connectivities * (1 - split))
+        left = random_proposition(max_num_atoms, num_left)
+        right = random_proposition(max_num_atoms, num_right)
+        if random.choice([True, False]):
+            p = Conjunction(left, right)
+        else:
+            p = Disjunction(left, right)
+        if random.choice([True, False]):
+            p = Negation(p)
+        return p
+
+
 if __name__ == "__main__":
-    p = Conjunction(Disjunction(Atomic("A"), Atomic("B")), Negation(Atomic("C")))
-    oracle, lookup = phase_oracle(p)
-    grover = grover(oracle, lookup)
-    grover_i_times = QuantumCircuit(oracle.num_qubits)
-    grover_i_times.append(grover, list(range(oracle.num_qubits)))
-    grover_i_times.append(grover, list(range(oracle.num_qubits)))
-    print(grover_i_times)
+    print(random_proposition(3, 5))
