@@ -2,6 +2,7 @@ from main import *
 import pytest
 from qiskit.primitives import StatevectorSampler
 
+
 def test_satisfiable_simple_tautologi():
     p = Disjunction(Atomic("A"), Negation(Atomic("A")))
     sampler = StatevectorSampler()
@@ -54,6 +55,7 @@ def test_satisfiable_complex_single_solution():
 
     sampler = StatevectorSampler()
     assert satisfiable(not_p, sampler) == True
+
 
 def test_satisfiable_brute_simple_tautologi():
     p = Disjunction(Atomic("A"), Negation(Atomic("A")))

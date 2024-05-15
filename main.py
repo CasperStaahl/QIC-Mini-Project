@@ -6,6 +6,7 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+
 # from qiskit_ibm_runtime import SamplerV2 as Sampler
 
 Assignment = Dict[str, bool]
@@ -283,4 +284,5 @@ def all_assignments(atoms):
 
 
 if __name__ == "__main__":
-    print(random_proposition(3, 5))
+    qc, _ = phase_oracle(random_proposition(15, 10))
+    print(qc.num_qubits)

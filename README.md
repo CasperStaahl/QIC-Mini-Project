@@ -37,6 +37,17 @@ In the case where no counter witness is found we continue until the probability 
 
 ## Simulations
 
+For the simulation is just wanted to test how reliable the SAT solver was, my argument for why this is really the only meaningful metric for the simulations are as follows:
+In general normal SAT benchmarks are far to large for the simulator to handle (32 qbits is the max), the smallest benchmarks I could find having 20 variables and 91 clauses, and further the simulation is far to slow on even smaller 'benchmarks'.
+
+Therefore I wrote a small script to generate random propositions, with parameters for the maximum number of atoms and number of connectivities.
+The only thing that can ever go wrong is that a false negative is reported, false positives are check by evaluating the assignment.
+I carried out ad hoc fuzz testing to see if could get the solver to report false negatives (results were compared against a very simple brute force SAT solver), the results are provided below.
+
+Running 10000 test with random proposition with maximum 3 atoms and 3 connectivities I was able to get 2 false negatives.
+
+Running 1000 test with random proposition with maximum 5 atoms and 5 connectivities I was able to get 0 false negatives.
+
 ## Hardware execution
 
 ## Discussion of simulation and hardware results
