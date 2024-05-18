@@ -205,12 +205,26 @@ def phase_oracle_recur(
         return qc_junction
 
 
-def grover(oracle, atom_lookup):
+def grover(oracle: QuantumCircuit , atom_lookup: Dict[str, int]) -> QuantumCircuit:
+    """
+    Creates the corresponding Grover operator given a phase oracle describing a proposition.
+
+    Args:
+        oracle (QuantumCircuit): Phase oracle describing a proposition, top most bits should correspond to the atomic propositions and align with atom_lookup, the bottom most bit should be the result bit.
+        atom_lookup (Dict[str, int]): Lookup table corresponding atomic propositions to their location in oracle.
+
+    Returns:
+        QuantumCircuit: A grover operator with oracle as the oracle.
+
+    """
+    # All the workspace bits should be ignored in the Grover operator, hence the lines below
     qc_state_prep = QuantumCircuit(oracle.num_qubits)
     qc_state_prep.h(oracle.num_qubits - 1)
     for i in range(len(atom_lookup)):
         qc_state_prep.h(i)
     reflection_qubits = list(range(len(atom_lookup))) + [oracle.num_qubits - 1]
+
+    # Create and return the Grover operator.
     grover_op = GroverOperator(
         oracle, qc_state_prep, reflection_qubits=reflection_qubits
     )
@@ -218,10 +232,16 @@ def grover(oracle, atom_lookup):
 
 
 def count_atomic_propositions(p: Proposition) -> int:
+    """
+    Counts the number of atomic proposition in p.
+    """
     return len(atomic_propositions(p))
 
 
 def atomic_propositions(p: Proposition) -> Set[str]:
+    """
+    Gives all atomic propositions in p.
+    """
     if type(p) is Atomic:
         return {p.id}
     if type(p) is Negation:
@@ -231,6 +251,9 @@ def atomic_propositions(p: Proposition) -> Set[str]:
 
 
 def valuation(p: Proposition, ass: Assignment):
+    """
+    Evaluate proposition p using the assignment ass.
+    """
     if type(p) is Atomic:
         return ass[p.id]
     if type(p) is Negation:
