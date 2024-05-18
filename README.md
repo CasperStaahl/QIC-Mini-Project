@@ -48,6 +48,9 @@ Running 10000 test with random proposition with maximum 3 atoms and 3 connectivi
 
 Running 1000 test with random proposition with maximum 5 atoms and 5 connectivities I was able to get 0 false negatives.
 
+Running 100 test with random proposition with maximum 10 atoms and 10 connectivities I was not able to even finish a single run...
+
+
 ## Hardware execution
 
 ## Discussion of simulation and hardware results

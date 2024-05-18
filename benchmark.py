@@ -2,9 +2,9 @@ from main import *
 from qiskit.primitives import StatevectorSampler
 
 if __name__ == "__main__":
-    num_tests = 1000
-    num_connectivities = 5
-    max_num_atmos = 5
+    num_tests = 100
+    num_connectivities = 10
+    max_num_atmos = 10
     num_false_negatives = 0
     num_false_positives = 0
     sampler = StatevectorSampler()
