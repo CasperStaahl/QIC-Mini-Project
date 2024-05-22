@@ -6,13 +6,13 @@ from qiskit.primitives import StatevectorSampler
 def test_satisfiable_simple_tautologi():
     p = Disjunction(Atomic("A"), Negation(Atomic("A")))
     sampler = StatevectorSampler()
-    assert satisfiable(p, sampler) == True
+    assert satisfiable(p, sampler, False) == True
 
 
 def test_satisfiable_simple_contradiction():
     p = Conjunction(Atomic("A"), Negation(Atomic("A")))
     sampler = StatevectorSampler()
-    assert satisfiable(p, sampler) == False
+    assert satisfiable(p, sampler, False) == False
 
 
 def test_satisfiable_complex_contradiction():
@@ -34,7 +34,7 @@ def test_satisfiable_complex_contradiction():
     not_p = Negation(p)
 
     sampler = StatevectorSampler()
-    assert satisfiable(not_p, sampler) == False
+    assert satisfiable(not_p, sampler, False) == False
 
 
 def test_satisfiable_complex_single_solution():
@@ -54,7 +54,7 @@ def test_satisfiable_complex_single_solution():
     not_p = Negation(p)
 
     sampler = StatevectorSampler()
-    assert satisfiable(not_p, sampler) == True
+    assert satisfiable(not_p, sampler, False) == True
 
 
 def test_satisfiable_brute_simple_tautologi():

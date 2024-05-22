@@ -6,6 +6,7 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from qiskit import transpile
 
 # from qiskit_ibm_runtime import SamplerV2 as Sampler
 
@@ -50,7 +51,7 @@ class Disjunction(Proposition):
         return f"({self.p1.__str__()}∧{self.p2.__str__()})"
 
 
-def satisfiable(p: Proposition, sampler) -> bool:
+def satisfiable(p: Proposition, backend_or_sampler, is_backend: bool) -> bool:
     """
     Determines if proposition p is satisfiable, using Grover's algorithm with amplitude amplification.
 
@@ -85,9 +86,13 @@ def satisfiable(p: Proposition, sampler) -> bool:
         # isa_grover_i_times = pm.run(grover_i_times)
 
         # Run circuit, get result.
-        result = (
-            sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
-        )
+        if is_backend :
+            grover_k_times = transpile(grover_k_times, backend_or_sampler)
+            result = (
+                backend_or_sampler.run(grover_k_times, shots=1).result().get_counts()
+            )
+        else:
+            result = backend_or_sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
         result_bit_string = next(iter(result))[::-1]
 
         # Convert result to an assignment, and check if the valuation of the assignment is True.
