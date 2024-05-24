@@ -8,9 +8,8 @@ The task is to use Grover's algorithm to implement a SAT solver.
 
 [1] describes the algorithm that I use, as described in the sequel. They extend Grover's algorithm to work for an unknown amount of solutions, such that a solutions is almost certain to be found. The method present in [1] is generalized in [2] to what is know as Quantum amplitude amplification.
 
-
-
 [1] : Boyer, Michel, et al. "Tight bounds on quantum searching." Fortschritte der Physik: Progress of Physics 46.4‐5 (1998): 493-505.
+
 [2] : Brassard, Gilles, and Peter Hoyer. "An exact quantum polynomial-time algorithm for Simon's problem." Proceedings of the Fifth Israeli Symposium on Theory of Computing and Systems. IEEE, 1997.
 
 ## Method
