@@ -6,6 +6,13 @@ The task is to use Grover's algorithm to implement a SAT solver.
 
 ## State of the art
 
+[1] describes the algorithm that I use, as described in the sequel. They extend Grover's algorithm to work for an unknown amount of solutions, such that a solutions is almost certain to be found. The method present in [1] is generalized in [2] to what is know as Quantum amplitude amplification.
+
+
+
+[1] : Boyer, Michel, et al. "Tight bounds on quantum searching." Fortschritte der Physik: Progress of Physics 46.4‐5 (1998): 493-505.
+[2] : Brassard, Gilles, and Peter Hoyer. "An exact quantum polynomial-time algorithm for Simon's problem." Proceedings of the Fifth Israeli Symposium on Theory of Computing and Systems. IEEE, 1997.
+
 ## Method
 
 The algorithm below serves as a high-level overview, and hopefully convinces you that the solution will work.
@@ -50,6 +57,12 @@ Running 100 test with random proposition with maximum 10 atoms and 10 connectivi
 
 
 ## Hardware execution
+
+I was able to get the Rigetti Quantum simulator to run my algorithm, but for some reason it would not run on real hardware... One would expect that if it worked in the simulator it would work on real hardware.
+
+I was however able to run my algorithm on the Quantinuum hardware
+Hardware executions were incredibly slow, (todo: how slow?).
+Therefore I was not able to test the reliability in the same scope as above.
 
 ## Discussion of simulation and hardware results
 
