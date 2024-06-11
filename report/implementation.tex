@@ -34,5 +34,28 @@ def satisfiable(p: Proposition, backend_or_sampler, is_backend: bool) -> bool:
     return False
 \end{minted}
 \caption{Implementation of \mintinline{python}{satisfiable} }
-\label{lst:satisfiable}
+\label{fig:satisfiable}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{minted}{python}
+def phase_oracle(p: Proposition) -> QuantumCircuit:
+    atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
+    qc_base = QuantumCircuit(len(atom_lookup))
+    qc_r = phase_oracle_recur(p, qc_base, atom_lookup)
+    qc_r_r_daggert_pos = list(range(0, qc_r.num_qubits))
+    qc_final = QuantumCircuit(qc_r.num_qubits + 1)
+    qc_final.compose(qc_r, qc_r_r_daggert_pos, inplace=True)
+    qc_final.x(qc_final.num_qubits - 1)
+    qc_final.h(qc_final.num_qubits - 1)
+    qc_final.cx(qc_final.num_qubits - 2, qc_final.num_qubits - 1)
+    qc_final.h(qc_final.num_qubits - 1)
+    qc_final.x(qc_final.num_qubits - 1)
+    qc_r_daggert = qc_r.inverse()
+    qc_final.compose(qc_r_daggert, qc_r_r_daggert_pos, inplace=True)
+    return qc_final, atom_lookup
+\end{minted}
+\caption{Implementation of \mintinline{python}{phase_oracle} }
+\label{fig:phase_oracle}
 \end{figure}
