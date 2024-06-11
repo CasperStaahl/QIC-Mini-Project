@@ -1,3 +1,29 @@
 \section{Method}\label{sec:method}
 
+The algorithm in \autoref{fig:satisfiable-pseudocode} serves as a high-level overview, and hopefully convinces you that the solution will work.
 
+\begin{figure}
+\centering
+\begin{minted}{python}
+def satisfiable(p: Proposition, sampler) -> bool:
+oracle = phase_oracle(p)
+N = 2 ** count_atomic_propositions(p)
+m = 1
+while m <= sqrt(N):
+    k = random{1, 2, ..., round(m)}
+    grover_k_times = grover(oracle, k)
+    assignment = grover_k_times.run()
+    if valuation(assignment):
+        return True
+    m = (5 / 4) * m
+return False
+\end{minted}
+\caption{High level pseudocode of \mintinline{python}{satisfiable} }
+\label{fig:satisfiable-pseudocode}
+\end{figure}
+
+The idea is to convert \texttt{p} to an quantum circuit corresponding to the oracle in Grover's algorithm, and run Grover's algorithm  on this oracle until the probability of us missing a solution is sufficiently small.
+For this purpose we use amplitude amplification:
+we iteratively pick \texttt{k}, the number of Grover's operator applications from the integer range $[1, \operatorname{round}(\texttt{m})]$, with $\texttt{m} = 1$ initially.
+If Grover's algorithm returns an assignment with the evaluates to true for the proposition \texttt{p} we stop, otherwise we continue increasing $\texttt{m}$ exponentially (in our case \mintinline{python}{m = (5 / 4) * m}) after each iteration.
+We stop when $\texttt{m} \leq \sqrt{\texttt{N}}$.

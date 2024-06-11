@@ -1,1 +1,38 @@
 \section{Implementation}\label{sec:implementation}
+
+\begin{figure}
+\centering
+\begin{minted}{python}
+def satisfiable(p: Proposition, backend_or_sampler, is_backend: bool) -> bool:
+    oracle, atom_lookup = phase_oracle(p)
+    grover_op = grover(oracle, atom_lookup)
+    N = 2 ** count_atomic_propositions(p)
+    m = 1
+    while m <= math.sqrt(N):
+        k = random.randint(1, round(m))
+        grover_k_times = QuantumCircuit(grover_op.num_qubits)
+        grover_k_times.h(list(range(len(atom_lookup))) + [grover_op.num_qubits - 1])
+        for _ in range(k):
+            grover_k_times.compose(grover_op, inplace=True)
+        grover_k_times.measure_all()
+        if is_backend :
+            grover_k_times = transpile(grover_k_times, backend_or_sampler)
+            result = (
+                backend_or_sampler.run(grover_k_times, shots=1).result().get_counts()
+            )
+        else:
+            result = backend_or_sampler.run([grover_k_times], shots=1).result()[0].data.meas.get_counts()
+        result_bit_string = next(iter(result))[::-1]
+        witness_assignment = {}
+        for atom in atomic_propositions(p):
+            witness_assignment[atom] = char_to_bool(
+                result_bit_string[atom_lookup[atom]]
+            )
+        if valuation(p, witness_assignment):
+            return True
+        m = (5 / 4) * m
+    return False
+\end{minted}
+\caption{Implementation of \mintinline{python}{satisfiable} }
+\label{lst:satisfiable}
+\end{figure}
