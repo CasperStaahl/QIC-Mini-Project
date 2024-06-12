@@ -1,7 +1,7 @@
 import math
 import random
 from itertools import product
-from typing import Dict, Set
+from typing import Dict, Set, Tuple
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import GroverOperator
@@ -111,7 +111,7 @@ def satisfiable(p: Proposition, backend_or_sampler, is_backend: bool) -> bool:
     return False
 
 
-def phase_oracle(p: Proposition) -> QuantumCircuit:
+def phase_oracle(p: Proposition) -> Tuple[QuantumCircuit, Dict[str, int]]:
     """
     Creates a quantum circuit that represents the proposition p.
 
@@ -124,7 +124,7 @@ def phase_oracle(p: Proposition) -> QuantumCircuit:
 
     Returns:
         QuantumCircuit: p as a QuantumCircuit.
-
+        Dict[str, int]: a lookup table that corresponds atomic proposition to their location in the circuit.
     """
     # Create a lookup table that corresponds atomic proposition to their location in the circuit.
     atom_lookup = {item: index for index, item in enumerate(atomic_propositions(p))}
