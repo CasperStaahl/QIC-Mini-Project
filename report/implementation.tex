@@ -81,6 +81,78 @@ def phase_oracle(p: Proposition) -> Tuple[QuantumCircuit, Dict[str, int]]:
 
 \subsubsection{\texttt{phase\_oracle\_recur} Implementation}\label{subsubsec:phase-oracle-recur-implementation}
 
+The implementation of \texttt{phase\_oracle\_recur} and thus the construction of $R$ proceeds by recursion on the structure of the proposition \texttt{p}.
+
+The base case, when \texttt{p} is an atomic proposition, is handled on line 4 through 8.
+In this case the location of the qubit corresponding to the atomic proposition is found, and a fanout is created introducing a new qubit, as shown in \autoref{fig:fanout}.
+Note that only basis states are copied, as general copying of quantum states is impossible.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/FANOUT-with-CNOT.jpg}
+    \caption{FANOUT gate}
+    \label{fig:fanout}
+\end{figure}
+
+The first recursive case, when \texttt{p} is the negation of some proposition \texttt{p.not\_p}, is handled on line 9 through 12.
+In this case we recurse on \texttt{p.not\_p} and add a NOT gate to the result qubit of the resulting circuit.
+
+The second recursive case, when \texttt{p} is two propositions \texttt{p.p1}, \texttt{p.p2} connected by some connectivity (either $\land$ or $\lor$), is handled on line 13 through 34.
+In this case we recurse on the two propositions \texttt{p.p1}, \texttt{p.p2} and the resulting circuits are combined in the following manner:
+First the part of the circuit where the atomic propositions reside, ignoring fanouts, are combined at the top of the circuit.
+Then the rest of the resulting circuits are stacked upon each other.
+Finally, a result bit is added at the bottom as indicated by \autoref{fig:and-not-gates}.
+In figure \autoref{fig:and-not-gates} the location of the top two qubits correspond the location of the result qubits in the resulting circuits of \texttt{p.p1} and \texttt{p.p2}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/AND-and-OR-with-Toffoli.jpg}
+    \caption{AND and NOT gates}
+    \label{fig:and-not-gates}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minted}{python}
+def phase_oracle_recur(
+    p: Proposition, qc_base: QuantumCircuit, atom_lookup: Dict[str, int]
+) -> QuantumCircuit:
+    if type(p) is Atomic:
+        qc_atom = QuantumCircuit(qc_base.num_qubits + 1)
+        qc_atom.cx(atom_lookup[p.id], qc_base.num_qubits, f"atom {p.id}")
+        qc_atom.compose(qc_base, list(range(1, qc_base.num_qubits + 1)))
+        return qc_atom
+    if type(p) is Negation:
+        qc_pnot = phase_oracle_recur(p.not_p, qc_base, atom_lookup)
+        qc_pnot.x(qc_pnot.num_qubits - 1)
+        return qc_pnot
+    if type(p) is Conjunction or Disjunction:
+        qc_1 = phase_oracle_recur(p.p1, qc_base, atom_lookup)
+        qc_2 = phase_oracle_recur(p.p2, qc_base, atom_lookup)
+        qc_base_start = 0
+        qc_base_end = qc_base_start + qc_base.num_qubits
+        qc_base_range = list(range(qc_base_start, qc_base_end))
+        qc_1_start = qc_base_end
+        qc_1_end = qc_1_start + qc_1.num_qubits - qc_base.num_qubits
+        qc_2_start = qc_1_end
+        qc_2_end = qc_2_start + qc_2.num_qubits - qc_base.num_qubits
+        qc_junction = QuantumCircuit(qc_2_end + 1)
+        qc_1_range = qc_base_range + list(range(qc_1_start, qc_1_end))
+        qc_junction.compose(qc_1, qc_1_range, inplace=True)
+        qc_2_range = qc_base_range + list(range(qc_2_start, qc_2_end))
+        qc_junction.compose(qc_2, qc_2_range, inplace=True)
+        if type(p) is Disjunction:
+            qc_junction.x(qc_1_end - 1)
+            qc_junction.x(qc_2_end - 1)
+        qc_junction.ccx(qc_1_end - 1, qc_2_end - 1, qc_junction.num_qubits - 1)
+        if type(p) is Disjunction:
+            qc_junction.x(qc_junction.num_qubits - 1)
+        return qc_junction
+\end{minted}
+\caption{Implementation of \texttt{phase\_oracle\_recur} }
+\label{fig:phase_oracle_recur}
+\end{figure}
+
 \subsection{\texttt{grover} Implementation}
 
 \begin{figure}
