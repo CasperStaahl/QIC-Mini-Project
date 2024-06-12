@@ -1,5 +1,11 @@
 \section{Method}\label{sec:method}
 
+The main design objective is to create an algorithm that can solve the SAT problem using Grover's algorithm.
+Further, the algorithm must be correct, and must be able to be both simulated and ran on real hardware.
+In terms of constraints, we will not try to optimize the running time of the algorithm, and therefor we will not deal with parallelism and such.
+The prequel was decided because the running time of the algorithm, both in simulation and on real hardware, would not be indicative of the possible speedup introduced by Grover's algorithm.
+In particular, the simulation of a quantum circuit is much slower that the real execution, and to run quantum circuits on real quantum hardware one has to sit in hour long queues.
+
 The algorithm in \autoref{fig:satisfiable-pseudocode} serves as a high-level overview, and hopefully convinces you that the solution will work.
 
 \begin{figure}
