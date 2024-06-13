@@ -11,7 +11,7 @@ The algorithm in \autoref{fig:satisfiable-pseudocode} serves as a high-level ove
 \begin{figure}
 \centering
 \begin{minted}{python}
-def satisfiable(p: Proposition, sampler) -> bool:
+def satisfiable(p: Proposition) -> bool:
 oracle = phase_oracle(p)
 N = 2 ** count_atomic_propositions(p)
 m = 1
