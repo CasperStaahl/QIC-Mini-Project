@@ -1,6 +1,8 @@
-\documentclass{article}
+\documentclass[english,a4paper,compsoc,conference,onecolumn]{IEEEtran}
+\overfullrule=10pt
+\frenchspacing
 
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage[outputdir=./out]{minted}
 \setminted{
     breaklines=true,
@@ -9,8 +11,15 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 
+\usepackage{url}
+\usepackage[
+backend=biber,
+style=alphabetic,
+]{biblatex}
+\addbibresource{citations.bib}
+
 \title{Quantum Information and Computing (QIC) \\ Mini-Project}
-\author{Anders Malta Jacobsen and Casper Ståhl}
+\author{Anders Malta Jakobsen and Casper Ståhl}
 
 \begin{document}
 
@@ -24,5 +33,7 @@
 \input{hardware_execution}
 \input{discussion}
 \input{conclusion}
+\newpage
+\printbibliography
 
 \end{document}

@@ -195,9 +195,22 @@ def phase_oracle_recur(
 
 \subsection{\texttt{grover} Implementation}\label{subsec:grover-implementation}
 
-\begin{figure}
+The code seen in \autoref{fig:grover} is how our implementation handles the construction of the Grover operation on the given proposition p, represented as its corresponding quantum circuit.
+In line 2, we construct a quantum circuit which has the same size as the oracle.
+This is going to be used for representing which qubits of the oracle we want affected by the Grover operation.
 
-\end{figure}
+Then in line 3--5, we set up a hadamard gate to be used on the basis state qubits; these being each qubit representing an atom of the proposition and the result qubit.
+This is being done on the previously constructed quantum circuit, \texttt{qc\_state\_prep}, essentially ignoring the so-called workspace qubits, and only focusing on the ones in basis state.
+The reason for doing this is that we only want to apply the Grover operation to the basis state qubits.
+
+In line 6, we then select and make a list of the same qubits as the prequel.
+The reason for this are the parameters needed for the GroverOperator, G, constructor in line 7.
+This is a class already defined in Qiskit, which defines a Grover operator representing a single run through the unitary algorithm, namely $G=H^{\bigotimes n}Z_{OR}H^{\bigotimes n}Z_f$ as stated in~\cite{Grover}.
+Here, $Z_{OR}$ is being handled by the class, to which we gave the reflection qubits selected in line 7 and the quantum circuit, \texttt{qc\_state\_prep}.
+
+Our oracle is then equivalent to the $Z_f$ operation of the algorithm.
+
+At last, in line 10, we return the constructed Grover operator such that it can be used as a tool in going through the algorithm, as seen in \autoref{fig:oracle}.
 
 \begin{figure}
 \centering
@@ -216,3 +229,5 @@ def grover(oracle: QuantumCircuit , atom_lookup: Dict[str, int]) -> QuantumCircu
 \caption{Implementation of \mintinline{python}{grover} }
 \label{fig:grover}
 \end{figure}
+
+
