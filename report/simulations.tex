@@ -1,1 +1,54 @@
 \section{Simulations}\label{sec:simulations}
+
+For the simulations we wanted to rat out scenarios where the algorithm would fail.
+Further, in the scenarios where the algorithm would fail, we wanted to know if the given input would always cause the algorithm to fail, or if running the algorithm a second time would provide the correct output.
+Note that the only way the algorithm can fail is by returning a false negative, that is, when there is a solution but none is found.
+Therefore we proceeded in a fuzz testing manner~\cite{miller1990empirical}, bombarding the algorithm with random propositions, checking the result against a brute force algorithm that we knew was correct.
+
+For this purpose we have written a script that can generate random propositions, as shown in \autoref{fig:random_prop}.
+
+\begin{figure}[H]
+\centering
+\begin{minted}{python}
+def random_proposition(max_num_atoms: int, num_connectivities: int) -> Proposition:
+    if num_connectivities == 0:
+        atom = Atomic(f"{random.randint(0, max_num_atoms - 1)}")
+        if random.choice([True, False]):
+            atom = Negation(atom)
+        return atom
+    if 0 < num_connectivities:
+        split = random.uniform(0, 1)
+        _num_connectivities = num_connectivities - 1
+        num_left = math.floor(_num_connectivities * split)
+        num_right = math.ceil(_num_connectivities * (1 - split))
+        left = random_proposition(max_num_atoms, num_left)
+        right = random_proposition(max_num_atoms, num_right)
+        if random.choice([True, False]):
+            p = Conjunction(left, right)
+        else:
+            p = Disjunction(left, right)
+        if random.choice([True, False]):
+            p = Negation(p)
+        return p
+\end{minted}
+\caption{Implementation of \texttt{random\_proposition} }
+\label{fig:random_prop}
+\end{figure}
+
+For the individual test we would first do one run of the quantum algorithm and compare it to the brute force algorithm, if the results where not equal we would do a second run of the quantum algorithm and check the result again.
+The results of the simulation can be seen in \autoref{table:sim-results}.
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+Max \# of Atoms & \# Connectivities & \# Tests &  \# Wrong 1st Run & \# Wrong 2nd Run \\
+\hline
+3 & 3 & 100000 & 45 & 1 \\
+5 & 5 &  10000 & 12 & 0 \\
+7 & 7 &      8 &  0 & 0 \\
+\hline
+\end{tabularx}
+\caption{Simulation results}
+\label{table:sim-results}
+\end{table}

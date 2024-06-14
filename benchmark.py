@@ -3,9 +3,9 @@ from qiskit.primitives import StatevectorSampler
 import pandas as pd
 
 if __name__ == "__main__":
-    num_tests = 10000
-    num_connectivities = 5
-    max_num_atoms = 5
+    num_tests = 100
+    num_connectivities = 7
+    max_num_atoms = 7
     num_false_negatives = 0
     num_false_positives = 0
     sampler = StatevectorSampler()
@@ -30,5 +30,5 @@ if __name__ == "__main__":
 
     df_both_not_correct = df[(df["correct"] == False) & (df["correct_2nd"] == False)]
     print(df_both_not_correct)
-    df_not_correct.to_csv(f"results/sim_{num_tests}_{num_connectivities}_{max_num_atoms}_both_not_correct.csv", index=False)
+    df_both_not_correct.to_csv(f"results/sim_{num_tests}_{num_connectivities}_{max_num_atoms}_both_not_correct.csv", index=False)
 

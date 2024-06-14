@@ -43,4 +43,4 @@ if __name__ == "__main__":
 
     df_both_not_correct = df[(df["correct"] == False) & (df["correct_2nd"] == False)]
     print(df_both_not_correct)
-    df_not_correct.to_csv(f"results/{backend_name}_{num_tests}_{num_connectivities}_{max_num_atoms}_both_not_correct.csv", index=False)
+    df_both_not_correct.to_csv(f"results/{backend_name}_{num_tests}_{num_connectivities}_{max_num_atoms}_both_not_correct.csv", index=False)
