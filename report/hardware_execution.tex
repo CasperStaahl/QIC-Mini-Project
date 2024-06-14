@@ -1,1 +1,12 @@
 \section{Hardware Execution}\label{sec:hardware-execution}
+We have made it so that the algorithm can also be executed on real quantum hardware.
+Through Microsoft Azure's workspace, we have gotten access to hardware from different vendors.
+The idea was to test the algorithm in one of these, but it turned out that the queue times for these quantum computers would be too long.
+The reason for this being that every time a new iteration of the algorithm is run, a new separate query to the hardware queue has to be made.
+This means that our testing has to go back in the queue for every instance of the algorithm, which we concluded was not viable with the given time.
+
+Though it should be mentioned that we queried small executions to the hardware provided with Quantinuum, which provided us with a successful run of the algorithm.
+
+
+Nevertheless, we chose to do test executions on a quantum simulator instead.
+Here, we chose to make use of the simulator provided by Rigetti Computing.
