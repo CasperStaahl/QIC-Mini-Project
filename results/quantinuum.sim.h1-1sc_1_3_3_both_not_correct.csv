@@ -1,0 +1,2 @@
+proposition,satisfiable_brute,satisfiable,correct,satisfiable_2nd,correct_2nd
+(2∧(2∨¬(2∧¬2))),True,False,False,False,False
