@@ -1,1 +1,11 @@
 \section{State of the Art}\label{sec:state-of-the-art}
+Grover's algorithm is a promising unstructured search algorithm that takes advantage of our understanding of quantum computers.
+When searching for a single solution, the algorithm is proven to be asymptotically optimal with a worst case of $O\left(\sqrt{N}\right)$, making it quadratically faster than classical computing~\cite{Grover}.
+
+The quadratic speedup is possible mainly because of the so-called amplitude amplification technique.
+The main idea of this is to amplify the amplitude, hence increasing the probability, of the desired states, while also lowering the amplitude of undesired states.
+This is further explained in~\cite{Brassard, Grover}.
+
+In this paper though, we will be focusing on applying the algorithm to a search problem with an unknown amount of solutions.
+This case is described in~\cite{Boyer_1998}, and is almost certain to find a solution every time with a worst case of $O\left(\sqrt{N/t}\right)$, where $t$ is the amount of solutions.
+
