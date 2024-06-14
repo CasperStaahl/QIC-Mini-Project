@@ -4,7 +4,7 @@ Song gives a nice outline of Grover's quantum search algorithm and the evolution
 
 Grover's algorithm is a promising unstructured search algorithm that takes advantage of our understanding of quantum computers.
 When searching for a single solution in a search space of size $N$, the algorithm is proven to be asymptotically optimal with a worst case of $O\left(\sqrt{N}\right)$, making it quadratically faster than classical computing~\cite{grover1996fast}.
-An outline of the algorithm can be found in \autoref{alg:grover-known}, please refer to \cite{song2017early} for more thorough explanation.
+An outline of the algorithm can be found in \autoref{alg:grover-known}, please refer to \cite{song2017early} for a more thorough explanation.
 
 \begin{algorithm}
 \caption{Grover's quantum search algorithm (number of solutions known)~\cite{song2017early}}
@@ -20,6 +20,7 @@ An outline of the algorithm can be found in \autoref{alg:grover-known}, please r
 In our particular case, we are working with a problem where there might be more than one solution, and the original algorithm proposed by Grover only supports a setting where one solution or marked items are present.
 Luckily, Boyer et al. extended Grover's algorithm to support multiple marked items for both know and unknown amounts~\cite{boyer1998tight}.
 In particular, Boyer et al. showed that the algorithm shown in \ref{alg:grover-unknown} will find a marked item in $O(\sqrt{N/a})$ iterations where $N$ is the size of the search space and $a$ the number of marked items.
+Again, we refer to \cite{song2017early} for a more thorough explanation.
 
 \begin{algorithm}
 \caption{Quantum search with number of solutions unknown~\cite{song2017early}}
