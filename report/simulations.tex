@@ -37,6 +37,8 @@ def random_proposition(max_num_atoms: int, num_connectivities: int) -> Propositi
 
 For the individual test we would first do one run of the quantum algorithm and compare it to the brute force algorithm, if the results where not equal we would do a second run of the quantum algorithm and check the result again.
 The results of the simulation can be seen in \autoref{table:sim-results}.
+For propositions with a maximum of 7 atomic propositions and 7 connectivities only eight tests where conducted because the OOM killer kicked in.
+This behavior was consistent, with the OOM killer kicking in somewhere between test 1 and 20, as the program reaches around 30 GB memory usage.
 
 \begin{table}[h!]
 \centering
