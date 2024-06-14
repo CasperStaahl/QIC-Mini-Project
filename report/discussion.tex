@@ -1,1 +1,20 @@
 \section{Discussion}\label{sec:discussion}
+
+% - testing the algorithm on real hardware was limited... But we have a solution.
+As mentioned in the previous section, testing on real hardware was limited, and attempting to optimize the algorithm to exploit the Azure queuing system was determined to be outside the scope of the project.
+However, here we will present how the queuing could be exploited to speed up testing on real hardware: Instead of queuing one circuit at a time, one would queue all circuits needed for all tests at the same time.
+This is still an insane amount of circuits, especially because individual tests can't be short circuited when a solution is found.
+Therefore it might be the case that we are still not able to match the scale of the simulation on real hardware with this approach.
+
+% - Rigettis Simulations where not inspiring confidence... Maybe there is an explanation.
+We did however test our algorithm on the Rigetti hardware simulator, has queue times where less punishing there.
+Again, because of queuing times, we where not able to match the scale of the simulation.
+Further, the results did not inspire confidence in the correctness of the algorithm.
+However, we do have a theory that the error occurs somewhere in the transpilation of the circuits, as we where not able to run our algorithm on Rigettis real hardware.
+Investigating was deem out of the scope for this project.
+
+% - State vector simulations where inspiring especially when running it twice... Errors might be explainable also.
+The local simulations inspired confidence in the algorithm, especially when it was ran twice.
+In particular we observed a failure rate of $0.0009\%$ when running the algorithm twice, and a failure rate of $0.0518\%$ when running it once.
+
+% - The algorithm seems to work for very small propositions, both in terms of size and running time we are nowhere near beating any mainstream SAT solvers.

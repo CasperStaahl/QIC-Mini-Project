@@ -39,7 +39,7 @@ class Conjunction(Proposition):
         self.p2 = p2
 
     def __str__(self):
-        return f"({self.p1.__str__()}∨{self.p2.__str__()})"
+        return f"({self.p1.__str__()}∧{self.p2.__str__()})"
 
 
 class Disjunction(Proposition):
@@ -48,7 +48,7 @@ class Disjunction(Proposition):
         self.p2 = p2
 
     def __str__(self):
-        return f"({self.p1.__str__()}∧{self.p2.__str__()})"
+        return f"({self.p1.__str__()}∨{self.p2.__str__()})"
 
 
 def satisfiable(p: Proposition, backend_or_sampler, is_backend: bool) -> bool:
@@ -310,7 +310,33 @@ def all_assignments(atoms):
     for values in product([False, True], repeat=len(atoms)):
         yield dict(zip(atoms, values))
 
+def satisfiable_count(proposition):
+    atoms = atomic_propositions(proposition)
+    count = 0
+    for assignment in all_assignments(atoms):
+        if valuation(proposition, assignment):
+            count += 1
+    return count
+
 
 if __name__ == "__main__":
-    qc, _ = phase_oracle(random_proposition(15, 10))
-    print(qc.num_qubits)
+    p0 = Atomic("0")
+    p1 = Atomic("1")
+    p2 = Atomic("2")
+
+    not_p0 = Negation(p0)
+    not_p1 = Negation(p1)
+    not_p2 = Negation(p2)
+
+    not_p0_and_p2 = Conjunction(not_p0, p2)
+    not_not_p0_and_p2 = Negation(not_p0_and_p2)
+
+    not_p2_or_not_p1 = Disjunction(not_p2, not_p1)
+    not_not_p2_or_not_p1 = Negation(not_p2_or_not_p1)
+
+    expression = Conjunction(not_not_p0_and_p2, not_not_p2_or_not_p1)
+
+    # Printing the expression
+    print(expression)
+    print(satisfiable_count(expression))
+
