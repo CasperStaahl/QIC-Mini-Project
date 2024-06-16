@@ -7,17 +7,17 @@ However, here we will present how the queuing could be exploited to speed up tes
 This is still an insane amount of circuits, especially because individual tests can't be short circuited when a solution is found.
 Therefore it might be the case that we are still not able to match the scale of the simulation on real hardware with this approach.
 
-% - Rigettis Simulations where not inspiring confidence... Maybe there is an explanation.
-We did however test our algorithm on the Rigetti hardware simulator, has queue times where less punishing there.
-Again, because of queuing times, we where not able to match the scale of the simulation.
-Further, the results did not inspire confidence in the correctness of the algorithm.
-However, we do have a theory that the error occurs somewhere in the transpilation of the circuits, as we where not able to run our algorithm on Rigettis real hardware.
-Investigating this issue was deemed out of the scope for this project.
-
 % - State vector simulations where inspiring especially when running it twice... Errors might be explainable also.
 The local simulations inspired confidence in the algorithm, especially when it was ran twice.
 In particular we observed a failure rate of $0.0009\%$ when running the algorithm twice, and a failure rate of $0.0518\%$ when running it once.
 
-Our implementation seems to be working as intended, however, only for very small propositions, and with a horrendous running time and cost.
-For comparison SATLIB~\cite{hoos2000satlib} contains problems with 250 variables and 1065 clauses.
+% - Rigettis Simulations where not inspiring confidence... Maybe there is an explanation.
+As mentioned, we also tested our algorithm on the Rigetti hardware simulator, as it was free and queue times where less punishing there.
+Yet, because of queuing times, we where still not able to match the scale of the simulation.
+Further, the results were less inspiring than the state vector simulations.
+In particular we observed a failure rate of $0.3636\%$ when running the algorithm twice, and a failure rate of $2\%$ when running it once.
+We think that the reason that the results are worse on the Rigetti hardware simulator is because it models noise, yet we were unable to verify this in Azures documentation.
+
 % - The algorithm seems to work for very small propositions, both in terms of size and running time we are nowhere near beating any mainstream SAT solvers.
+Our implementation seems to be working as intended, however, only for very small propositions, and with a horrendous running time and cost, and in ideal noiseless conditions.
+For comparison of the size of problem that classical SAT solver are able to solve: SATLIB~\cite{hoos2000satlib} contains problems with 250 variables and 1065 clauses.

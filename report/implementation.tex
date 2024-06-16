@@ -79,8 +79,8 @@ These tests where left out for brevity and, as above, can be found in \texttt{te
 
 \subsection{\texttt{phase\_oracle} Implementation}\label{subsec:phase-oracle}
 
-\autoref{fig:oracle} should give an idea of the circuit that \texttt{phase\_oracle} returns, however, there are some differences: The circuit produced by \texttt{phase\_oracle} only has one output bit, and the result is encoded in the phase instead of the bit.
-This is done because the \texttt{GroverOperator} function, provided by Qiskit, expected such a circuit.
+\autoref{fig:oracle} should give an idea of the circuit that \texttt{phase\_oracle} returns.
+The circuit is constructed in this particular manner because the \texttt{GroverOperator} function, provided by Qiskit, expected such a circuit.
 
 \begin{figure}[H]
     \centering
@@ -89,6 +89,7 @@ This is done because the \texttt{GroverOperator} function, provided by Qiskit, e
     \label{fig:oracle}
 \end{figure}
 
+The implementation of \texttt{phase\_oracle} can be seen in \autoref{fig:phase_oracle}.
 First off, on line 1, a lookup table relating atomic propositions to their location inside the circuit is created.
 This lookup table is returned along with the circuit.
 Further, in line 2, the base circuit where qubits corresponding to atomic propositions reside is created.
@@ -195,22 +196,12 @@ def phase_oracle_recur(
 
 \subsection{\texttt{grover} Implementation}\label{subsec:grover-implementation}
 
-The code seen in \autoref{fig:grover} is how our implementation handles the construction of the Grover operation on the given proposition p, represented as its corresponding quantum circuit.
-In line 2, we construct a quantum circuit which has the same size as the oracle.
-This is going to be used for representing which qubits of the oracle we want affected by the Grover operation.
+The goal of \texttt{grover} is to construct the Grover operator that ignores the workspace qubits of the oracle.
+The implementation of \texttt{grover} can be seen in \autoref{fig:grover}.
 
-Then in line 3--5, we set up a hadamard gate to be used on the basis state qubits; these being each qubit representing an atom of the proposition and the result qubit.
-This is being done on the previously constructed quantum circuit, \texttt{qc\_state\_prep}, essentially ignoring the so-called workspace qubits, and only focusing on the ones in basis state.
+On line 2 through 5 we define that the reflection operation of the qubits corresponding to atomic propositions and the output qubit should be sandwiched between Hadamard gates.
+Finally on line 11 through 15 we specify the reflection qubits to be those corresponding to atomic propositions and the output qubit.
 
-
-In line 6, we then select and make a list of the same qubits as the prequel.
-The reason for this are the parameters needed for the GroverOperator, G, constructor in line 7.
-This is a class already defined in Qiskit, which defines a Grover operator representing a single run through the unitary algorithm, namely $G=H^{\bigotimes n}Z_{OR}H^{\bigotimes n}Z_f$ as stated in~\cite{Grover}.
-Here, $Z_{OR}$ is being handled by the class, to which we gave the reflection qubits selected in line 7 and the quantum circuit, \texttt{qc\_state\_prep}.
-
-Our oracle is then equivalent to the $Z_f$ operation of the algorithm.
-
-At last, in line 10, we return the constructed Grover operator such that it can be used as a tool in going through the algorithm, as seen in \autoref{fig:oracle}.
 
 \begin{figure}
 \centering

@@ -4,8 +4,24 @@ Through Microsoft Azure's workspace, we have gotten access to hardware from diff
 The idea was to test the algorithm in one of these, but it turned out that the queue times for these quantum computers would be too long.
 The reason for this being that every time a new iteration of the algorithm is run, a new separate query to the hardware queue has to be made.
 This means that our testing has to go back in the queue for every instance of the algorithm, which we concluded was not viable with the given time.
+Further, we were burning through our free credits, almost using our 500\$ in just a couple of runs of the algorithm.
 
 Though it should be mentioned that we queried small executions to the hardware provided with Quantinuum, which has provided us with several successful runs of the algorithm.
 
-Nevertheless, we have also done test executions on Rigettis quantum simulator.
-Note that Quantinuum does not provide a simulator for their platform, only a syntax checker, and therefore Rigettis simulator was chosen.
+Nevertheless, we have also done test executions on Rigettis free simulator.
+Note that Quantinuum does provide a simulator for their platform, but this one also requires payment, and therefore Rigettis simulator was chosen.
+The results can be seen in \autoref{table:hardware-sim-results}.
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+\hline
+Max \# of Atoms & \# Connectivities & \# Tests &  \# Wrong 1st Run & \# Wrong 2nd Run \\
+\hline
+3 & 3 & 1000 & 19 & 4 \\
+5 & 5 &  100 &  3 & 0 \\
+\hline
+\end{tabularx}
+\caption{Hardware simulation results (Rigetti)}
+\label{table:hardware-sim-results}
+\end{table}
