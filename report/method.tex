@@ -1,10 +1,10 @@
 \section{Method}\label{sec:method}
 
 The main design objective is to create an algorithm that can solve the SAT problem using Grover's algorithm.
-Further, the algorithm must be correct, and must be able to be both simulated and ran on real hardware.
-In terms of constraints, we will not try to optimize the running time of the algorithm, and therefor we will not deal with parallelism and such.
-The prequel was decided because the running time of the algorithm, both in simulation and on real hardware, would not be indicative of the possible speedup introduced by Grover's algorithm.
-In particular, the simulation of a quantum circuit is much slower that the real execution, and to run quantum circuits on real quantum hardware one has to sit in hour long queues.
+Further, the algorithm must be correct, and must be able to be both simulated and run on real hardware.
+In terms of constraints, we will not try to optimize the running time of the algorithm, and therefore we will not deal with parallelism and such.
+The decision was made because the running time of the algorithm, both in simulation and on real hardware, would not be indicative of the possible speedup introduced by Grover's algorithm.
+In particular, the simulation of a quantum circuit is much slower than the real execution, and to run quantum circuits on real quantum hardware one has to sit in hour-long queues.
 
 The algorithm in \autoref{fig:satisfiable-pseudocode} serves as a high-level overview, and hopefully convinces you that the solution will work.
 
@@ -28,9 +28,9 @@ return False
 \label{fig:satisfiable-pseudocode}
 \end{figure}
 
-The idea is to convert \texttt{p} to an quantum circuit corresponding to the oracle in Grover's algorithm, and run Grover's algorithm  on this oracle until the probability of us missing a solution is sufficiently small.
-For this purpose we use the method described in the previous section:
-we iteratively pick \texttt{k}, the number of Grover's operator applications from the integer range $[1, \operatorname{round}(\texttt{m})]$, with $\texttt{m} = 1$ initially.
-If Grover's algorithm returns an assignment with the evaluates to true for the proposition \texttt{p} we stop, otherwise we continue increasing $\texttt{m}$ exponentially (in our case \mintinline{python}{m = (5 / 4) * m}) after each iteration.
+The idea is to convert \texttt{p} to a quantum circuit corresponding to the oracle in Grover's algorithm, and run Grover's algorithm on this oracle until the probability of us missing a solution is sufficiently small.
+For this purpose, we use the method described in the previous section:
+We iteratively pick \texttt{k}, the number of Grover's operator applications from the integer range $[1, \operatorname{round}(\texttt{m})]$, with $\texttt{m} = 1$ initially.
+If Grover's algorithm returns an assignment that evaluates to true for the proposition \texttt{p}, we stop, otherwise we continue increasing $\texttt{m}$ exponentially (in our case \mintinline{python}{m = (5 / 4) * m}) after each iteration.
 We stop when $\texttt{m} \leq \sqrt{\texttt{N}}$.
-Note that we set increase $\texttt{m}$ by $(5 / 4) \cdot \texttt{m}$ each iteration and algorithm \ref{alg:grover-unknown}, specifies $6/5 \cdot \texttt{m}$, however they are approximately equal.
+Note that we increase $\texttt{m}$ by $(5 / 4) \cdot \texttt{m}$ each iteration and algorithm \ref{alg:grover-unknown}, specifies $6/5 \cdot \texttt{m}$, however, they are approximately equal.

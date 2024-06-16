@@ -1,17 +1,17 @@
 \section{Implementation}\label{sec:implementation}
 
-In \autoref{fig:satisfiable} the python implementation of \autoref{fig:satisfiable-pseudocode} can be found.
-This implementation is almost one to one, but there are some differences.
-On line 1 we already see a main difference, in that you have to provide a backend or sampler along with the proposition, in the call to \texttt{satisfiable}.
-On line 2 the phase oracle, a circuit representing the proposition \texttt{p}, is constructed along with a lookup table corresponding atomic propositions in \texttt{p} to their location in the phase oracle circuit.
+In \autoref{fig:satisfiable}, the python implementation of \autoref{fig:satisfiable-pseudocode} can be found.
+This implementation is almost one-to-one, but there are some differences.
+On line 1, we already see a main difference, in that you have to provide a backend or sampler along with the proposition, in the call to \texttt{satisfiable}.
+On line 2, the phase oracle, a circuit representing the proposition \texttt{p}, is constructed along with a lookup table corresponding to atomic propositions in \texttt{p} to their location in the phase oracle circuit.
 The implementation of \texttt{phase\_oracle} is described in \autoref{subsec:phase-oracle}.
-Next a single Grover operator is constructed based on the phase oracle and the lookup table, this is further described in \autoref{subsec:grover-implementation}.
-Next in line 4 and 5 the number of assignment possible for the proposition \texttt{p} are counted in \texttt{N}, and the upper bound for iterations of the Grover operator \texttt{m} is set to $1$.
-On line 6 through 29 while \texttt{m} is lower than equal to the square root of the number of total possible assignments we continue looking for a satisfying assignment, if none is found we return false.
-On line 7 through 12, the actual circuit is constructed, first the input and result qubits are put in superposition through the Hadarmard transform, next a random number (1 to \texttt{round(m)}) of grover operators are appended, and lastly all qubits are measured.
-On line 13 through 19, the circuit is ran and the result is recorded.
+Next, a single Grover operator is constructed based on the phase oracle and the lookup table, this is further described in \autoref{subsec:grover-implementation}.
+Next, in line 4 and 5 the number of assignments possible for the proposition \texttt{p} are counted in \texttt{N}, and the upper bound for iterations of the Grover operator \texttt{m} is set to $1$.
+On line 6 through 29, while \texttt{m} is lower than equal to the square root of the number of total possible assignments, we continue looking for a satisfying assignment, if none is found we return false.
+On line 7 through 12, the actual circuit is constructed, first the input and result qubits are put in superposition through the Hadamard transform, next a random number (1 to \texttt{round(m)}) of Grover operators are appended, and lastly all qubits are measured.
+On line 13 through 19, the circuit is run and the result is recorded.
 If a backend is supplied, the circuit first needs to be transpiled to that particular backend before the circuit can be ran.
-On line 20 through 28, the results is converted to an assignment using the lookup table for atomic propositions, and if the assignment satisfies the proposition \texttt{p} we return true, otherwise we continue to the next iteration with \texttt{m = (5 / 4) * m}.
+On line 20 through 28, the result is converted to an assignment using the lookup table for atomic propositions, and if the assignment satisfies the proposition \texttt{p}, we return true, otherwise we continue to the next iteration with \texttt{m = (5 / 4) * m}.
 
 \begin{figure}[H]
 \centering
@@ -54,7 +54,7 @@ def satisfiable(p: Proposition, backend_or_sampler, is_backend: bool) -> bool:
 
 \texttt{satisfiable} was tested with the \texttt{StatevectorSampler} using simple propositions.
 The tests shown in \autoref{fig:test-satisfiable} are indicative of this approach.
-More complex propositions where also used for testing, but they where left our for brevity and can be found in \texttt{test\_main.py}.
+More complex propositions were also used for testing, but they were left our for brevity and can be found in \texttt{test\_main.py}.
 
 \begin{figure}[H]
 \centering
@@ -74,13 +74,13 @@ def test_satisfiable_simple_contradiction():
 \label{fig:test-satisfiable}
 \end{figure}
 
-Further the valuation of propositions according to assignments where also testes along with the count of atomic proposition in a given proposition.
-These tests where left out for brevity and, as above, can be found in \texttt{test\_main.py}.
+Furthermore, the valuation of propositions according to assignments were also tested along with the count of atomic proposition in a given proposition.
+These tests were left out for brevity and, as above, can be found in \texttt{test\_main.py}.
 
 \subsection{\texttt{phase\_oracle} Implementation}\label{subsec:phase-oracle}
 
 \autoref{fig:oracle} should give an idea of the circuit that \texttt{phase\_oracle} returns.
-The circuit is constructed in this particular manner because the \texttt{GroverOperator} function, provided by Qiskit, expected such a circuit.
+The circuit is constructed in this particular manner because the \texttt{GroverOperator} function, provided by Qiskit, expects such a circuit.
 
 \begin{figure}[H]
     \centering
@@ -92,9 +92,9 @@ The circuit is constructed in this particular manner because the \texttt{GroverO
 The implementation of \texttt{phase\_oracle} can be seen in \autoref{fig:phase_oracle}.
 First off, on line 1, a lookup table relating atomic propositions to their location inside the circuit is created.
 This lookup table is returned along with the circuit.
-Further, in line 2, the base circuit where qubits corresponding to atomic propositions reside is created.
+Furthermore, in line 2, the base circuit where qubits corresponding to atomic propositions reside is created.
 On line 3, the circuit $R$ is created, this is further described in \autoref{subsubsec:phase-oracle-recur-implementation}.
-On line 6 through 12 the result is encoded in the phase of a separate qubit, by sandwiching a controlled not gate, depending on the result of $R$, between a not and Hadamard gate.
+On line 6 through 12, the result is encoded in the phase of a separate qubit, by sandwiching a controlled NOT gate, depending on the result of $R$, between a NOT and Hadamard gate.
 Finally, on line 13 through 15, $R^\dagger$ is created and added to the circuit, and the circuit and lookup table are returned.
 
 \begin{figure}[H]
@@ -122,10 +122,10 @@ def phase_oracle(p: Proposition) -> Tuple[QuantumCircuit, Dict[str, int]]:
 
 \subsubsection{\texttt{phase\_oracle\_recur} Implementation}\label{subsubsec:phase-oracle-recur-implementation}
 
-The implementation of \texttt{phase\_oracle\_recur} and thus the construction of $R$ proceeds by recursion on the structure of the proposition \texttt{p}.
+The implementation of \texttt{phase\_oracle\_recur}, and thus the construction of $R$ proceeds by recursion on the structure of the proposition \texttt{p}.
 
 The base case, when \texttt{p} is an atomic proposition, is handled on line 4 through 8.
-In this case the location of the qubit corresponding to the atomic proposition is found, and a fanout is created introducing a new qubit, as shown in \autoref{fig:fanout}.
+In this case, the location of the qubit corresponding to the atomic proposition is found, and a fanout is created, introducing a new qubit, as shown in \autoref{fig:fanout}.
 Note that only basis states are copied, as general copying of quantum states is impossible.
 
 \begin{figure}[H]
@@ -136,14 +136,14 @@ Note that only basis states are copied, as general copying of quantum states is 
 \end{figure}
 
 The first recursive case, when \texttt{p} is the negation of some proposition \texttt{p.not\_p}, is handled on line 9 through 12.
-In this case we recurse on \texttt{p.not\_p} and add a NOT gate to the result qubit of the resulting circuit.
+In this case, we recurse on \texttt{p.not\_p} and add a NOT gate to the result qubit of the resulting circuit.
 
 The second recursive case, when \texttt{p} is two propositions \texttt{p.p1}, \texttt{p.p2} connected by some connectivity (either $\land$ or $\lor$), is handled on line 13 through 34.
-In this case we recurse on the two propositions \texttt{p.p1}, \texttt{p.p2} and the resulting circuits are combined in the following manner:
-First the part of the circuit where the atomic propositions reside, ignoring fanouts, are combined at the top of the circuit.
+In this case, we recurse on the two propositions \texttt{p.p1}, \texttt{p.p2} and the resulting circuits are combined in the following manner:
+First, the part of the circuit where the atomic propositions reside, ignoring fanouts, are combined at the top of the circuit.
 Then the rest of the resulting circuits are stacked upon each other.
 Finally, a result bit is added at the bottom as indicated by \autoref{fig:and-not-gates}.
-In figure \autoref{fig:and-not-gates} the location of the top two qubits correspond the location of the result qubits in the resulting circuits of \texttt{p.p1} and \texttt{p.p2}.
+In \autoref{fig:and-not-gates}, the location of the top two qubits correspond to the location of the result qubits in the resulting circuits of \texttt{p.p1} and \texttt{p.p2}.
 
 \begin{figure}[H]
     \centering
@@ -199,8 +199,8 @@ def phase_oracle_recur(
 The goal of \texttt{grover} is to construct the Grover operator that ignores the workspace qubits of the oracle.
 The implementation of \texttt{grover} can be seen in \autoref{fig:grover}.
 
-On line 2 through 5 we define that the reflection operation of the qubits corresponding to atomic propositions and the output qubit should be sandwiched between Hadamard gates.
-Finally on line 11 through 15 we specify the reflection qubits to be those corresponding to atomic propositions and the output qubit.
+On line 2 through 5, we define that the reflection operation of the qubits corresponding to atomic propositions and the output qubit should be sandwiched between Hadamard gates.
+Finally, on line 11 through 15, we specify the reflection qubits to be those corresponding to atomic propositions and the output qubit.
 
 
 \begin{figure}

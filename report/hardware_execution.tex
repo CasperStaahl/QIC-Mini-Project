@@ -1,15 +1,15 @@
 \section{Hardware Execution}\label{sec:hardware-execution}
-We have made it so that the algorithm can also be executed on real quantum hardware.
-Through Microsoft Azure's workspace, we have gotten access to hardware from different vendors.
-The idea was to test the algorithm in one of these, but it turned out that the queue times for these quantum computers would be too long.
-The reason for this being that every time a new iteration of the algorithm is run, a new separate query to the hardware queue has to be made.
-This means that our testing has to go back in the queue for every instance of the algorithm, which we concluded was not viable with the given time.
-Further, we were burning through our free credits, almost using our 500\$ in just a couple of runs of the algorithm.
+We have ensured that the algorithm can also be executed on real quantum hardware.
+Through Microsoft Azure's workspace, we have gained access to hardware from different vendors.
+The idea was to test the algorithm on one of these machines, but it turned out that the queue times for these quantum computers would be too long.
+The reason for this is that every time a new iteration of the algorithm is run, a new separate query to the hardware queue has to be made.
+This means that our test would to go back in the queue for every instance of the algorithm, which we concluded was not viable with the given time.
+Further, we were burning through our free credits, almost using our \$500 in just a couple of runs of the algorithm.
 
-Though it should be mentioned that we queried small executions to the hardware provided with Quantinuum, which has provided us with several successful runs of the algorithm.
+It should be noted that we queried small executions to the hardware provided by Quantinuum, which has provided us with several successful runs of the algorithm.
 
-Nevertheless, we have also done test executions on Rigettis free simulator.
-Note that Quantinuum does provide a simulator for their platform, but this one also requires payment, and therefore Rigettis simulator was chosen.
+Nevertheless, we have also done test executions on Rigetti's free simulator.
+Note that Quantinuum does provide a simulator for their platform, but this one also requires payment, and therefore Rigetti's simulator was chosen.
 The results can be seen in \autoref{table:hardware-sim-results}.
 
 \begin{table}[h!]

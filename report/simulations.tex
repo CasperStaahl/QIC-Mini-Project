@@ -1,11 +1,11 @@
 \section{Simulations}\label{sec:simulations}
 
-For the simulations we wanted to rat out scenarios where the algorithm would fail.
+For the simulations, we wanted to identify scenarios where the algorithm would fail.
 Further, in the scenarios where the algorithm would fail, we wanted to know if the given input would always cause the algorithm to fail, or if running the algorithm a second time would provide the correct output.
 Note that the only way the algorithm can fail is by returning a false negative, that is, when there is a solution but none is found.
-Therefore we proceeded in a fuzz testing manner~\cite{miller1990empirical}, bombarding the algorithm with random propositions, checking the result against a brute force algorithm that we knew was correct.
+Therefore, we proceeded in a fuzz testing manner~\cite{miller1990empirical}, bombarding the algorithm with random propositions, checking the result against a brute-force algorithm that we knew was correct.
 
-For this purpose we have written a script that can generate random propositions, as shown in \autoref{fig:random_prop}.
+For this purpose, we have written a script that can generate random propositions, as shown in \autoref{fig:random_prop}.
 
 \begin{figure}[H]
 \centering
@@ -35,11 +35,11 @@ def random_proposition(max_num_atoms: int, num_connectivities: int) -> Propositi
 \label{fig:random_prop}
 \end{figure}
 
-For the individual test we would first do one run of the quantum algorithm and compare it to the brute force algorithm, if the results where not equal we would do a second run of the quantum algorithm and check the result again.
-As we wanted to test implementation in an ideal environment free of noise we used the Qiskit state vector simulator \cite{Statevec72:online}.
+For the individual test, we would first do one run of the quantum algorithm and compare it to the brute-force algorithm, if the results were not equal, we would do a second run of the quantum algorithm and check the result again.
+As we wanted to test the implementation in an ideal environment free of noise, we used the Qiskit state vector simulator \cite{Statevec72:online}.
 The results of the simulation can be seen in \autoref{table:sim-results}.
-For propositions with a maximum of 7 atomic propositions and 7 connectivities only eight tests where conducted because the OOM killer kicked in.
-This behavior was consistent, with the OOM killer kicking in somewhere between test 1 and 20, as the program reaches around 30 GB memory usage.
+For propositions with a maximum of 7 atomic propositions and 7 connectivities, only eight tests were conducted because the OOM killer kicked in.
+This behavior was consistent, with the OOM killer kicking in somewhere between test 1 and 20, as the program reached around 30 GB memory usage.
 
 \begin{table}[h!]
 \centering
