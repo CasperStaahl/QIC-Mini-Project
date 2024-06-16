@@ -6,9 +6,9 @@ import json
 import pandas as pd
 
 if __name__ == "__main__":
-    num_tests = 1
-    num_connectivities = 3
-    max_num_atoms = 3
+    num_tests = 100
+    num_connectivities = 5
+    max_num_atoms = 5
     num_false_negatives = 0
     num_false_positives = 0
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
             location = resource['location']
             )
     provider = AzureQuantumProvider(workspace)
-    backend_name = "quantinuum.sim.h1-1sc"
+    backend_name = "rigetti.sim.qvm"
     backend = provider.get_backend(backend_name)
 
     df = pd.DataFrame(columns=["proposition", "satisfiable_brute", "satisfiable", "correct", "satisfiable_2nd", "correct_2nd"])
