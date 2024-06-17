@@ -93,9 +93,9 @@ The implementation of \texttt{phase\_oracle} can be seen in \autoref{fig:phase_o
 First off, on line 1, a lookup table relating atomic propositions to their location inside the circuit is created.
 This lookup table is returned along with the circuit.
 Furthermore, in line 2, the base circuit where qubits corresponding to atomic propositions reside is created.
-On line 3, the circuit $R$ is created, this is further described in \autoref{subsubsec:phase-oracle-recur-implementation}.
-On line 6 through 12, the result is encoded in the phase of a separate qubit, by sandwiching a controlled NOT gate, depending on the result of $R$, between a NOT and Hadamard gate.
-Finally, on line 13 through 15, $R^\dagger$ is created and added to the circuit, and the circuit and lookup table are returned.
+On line 3, the circuit $U_p$ is created, this is further described in \autoref{subsubsec:phase-oracle-recur-implementation}.
+On line 6 through 12, the result is encoded in the phase using an auxiliary qubit, by sandwiching a controlled NOT gate, depending on the result of $U_p$, between a NOT and Hadamard gate.
+Finally, on line 13 through 15, $U_p^\dagger$ is created and added to the circuit, and the circuit and lookup table are returned.
 
 \begin{figure}[H]
 \centering
@@ -122,7 +122,7 @@ def phase_oracle(p: Proposition) -> Tuple[QuantumCircuit, Dict[str, int]]:
 
 \subsubsection{\texttt{phase\_oracle\_recur} Implementation}\label{subsubsec:phase-oracle-recur-implementation}
 
-The implementation of \texttt{phase\_oracle\_recur}, and thus the construction of $R$ proceeds by recursion on the structure of the proposition \texttt{p}.
+The implementation of \texttt{phase\_oracle\_recur}, and thus the construction of $U_p$ proceeds by recursion on the structure of the proposition \texttt{p}.
 
 The base case, when \texttt{p} is an atomic proposition, is handled on line 4 through 8.
 In this case, the location of the qubit corresponding to the atomic proposition is found, and a fanout is created, introducing a new qubit, as shown in \autoref{fig:fanout}.
@@ -136,7 +136,7 @@ Note that only basis states are copied, as general copying of quantum states is 
 \end{figure}
 
 The first recursive case, when \texttt{p} is the negation of some proposition \texttt{p.not\_p}, is handled on line 9 through 12.
-In this case, we recurse on \texttt{p.not\_p} and add a NOT gate to the result qubit of the resulting circuit.
+In this case, we recurse on \texttt{p.not\_p} and add a $X$ gate to the result qubit of the resulting circuit.
 
 The second recursive case, when \texttt{p} is two propositions \texttt{p.p1}, \texttt{p.p2} connected by some connectivity (either $\land$ or $\lor$), is handled on line 13 through 34.
 In this case, we recurse on the two propositions \texttt{p.p1}, \texttt{p.p2} and the resulting circuits are combined in the following manner:
@@ -148,7 +148,7 @@ In \autoref{fig:and-not-gates}, the location of the top two qubits correspond to
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{figures/AND-and-OR-with-Toffoli.jpg}
-    \caption{AND and NOT gates}
+    \caption{AND and OR gates}
     \label{fig:and-not-gates}
 \end{figure}
 
